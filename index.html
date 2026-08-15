@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Montevallo Health Professions Simulation Hub</title>
+    <!-- Chart.js library for dynamic graphing -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* MONTEVALLO BRAND PALETTE */
+        :root {
+            --um-purple: #3D1152; /* Primary */
+            --um-gold: #FFC629;   /* Accent */
+            --um-gold-pale: #FFECC0;
+            --bg-light: #F9F9FB;
+            --text-dark: #212121;
+            --text-light: #FFFFFF;
+            --border: #DCDCDC;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: var(--bg-light); color: var(--text-dark); padding: 20px; }
+
+        /* HEADER */
+        header { background-color: var(--um-purple); color: var(--text-light); padding: 20px; border-radius: 8px 8px 0 0; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow); }
+        #logo-placeholder { background: var(--um-gold-pale); color: var(--um-purple); font-weight: bold; padding: 10px 20px; border-radius: 4px; font-size: 0.9em; border: 2px solid var(--um-gold); }
+
+        /* TAB NAVIGATION */
+        .tabs { display: flex; background: var(--um-purple); margin-bottom: 20px; border-radius: 0 0 8px 8px; overflow: hidden; }
+        .tab-button { background: none; border: none; color: var(--um-gold-pale); padding: 15px 25px; cursor: pointer; font-size: 1em; font-weight: bold; transition: background 0.3s; flex-grow: 1; text-align: center;}
+        .tab-button:hover { background-color: rgba(255,198,41,0.2); }
+        .tab-button.active { background-color: var(--um-gold); color: var(--um-purple); }
+
+        /* CONTENT AREAS */
+        .tab-content { display: none; background: #FFF; padding: 30px; border-radius: 8px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        .tab-content.active { display: block; }
+
+        /* GRID LAYOUTS FOR SIMULATIONS */
+        .sim-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; }
+        @media (max-width: 900px) { .sim-grid { grid-template-columns: 1fr; } }
+
+        /* CONTROLS (Left Panel) */
+        .controls-panel { background: #F4F4F7; padding: 20px; border-radius: 8px; border: 1px solid var(--border); }
+        .controls-panel h3 { margin-bottom: 15px; color: var(--um-purple); }
+        
+        .control-group { margin-bottom: 20px; }
+        .control-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95em; }
+        .control-group span.value-display { float: right; color: var(--um-purple); font-weight: bold; }
+        
+        input[type="range"] { width: 100%; cursor: pointer; accent-color: var(--um-purple); }
+        
+        /* OUTPUTS (Right Panel) */
+        .outputs-panel { display: flex; flex-direction: column; gap: 20px; }
+        .chart-container { position: relative; height: 350px; width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 10px; background: #FFF;}
+        
+        .kpi-deck { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+        .kpi-card { background: var(--um-gold-pale); border: 2px solid var(--um-gold); padding: 15px; border-radius: 8px; text-align: center; }
+        .kpi-card .label { font-size: 0.85em; color: var(--um-purple); font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        .kpi-card .value { font-size: 1.8em; font-weight: bold; color: var(--text-dark); }
+        .kpi-card .unit { font-size: 0.9em; color: #555; margin-left: 3px;}
+
+        /* RISK GAUGE */
+        #risk-gauge-container { text-align: center; margin-top: 20px;}
+        #risk-gauge-text { font-weight: bold; font-size: 1.2em;}
+        .risk-low { color: #2E7D32; } .risk-mod { color: #F9A825; } .risk-high { color: #C62828; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h1>Physiological Simulation Hub</h1>
+        <p>College of Health Professions</p>
+    </div>
+    <!-- Replace this text with an <img> tag when you have the actual logo URL -->
+    <div id="logo-placeholder">UM-CHP Logo</div>
+</header>
+
+<nav class="tabs">
+    <button class="tab-button active" onclick="openTab(event, 'metabolism')">Metabolism</button>
+    <button class="tab-button" onclick="openTab(event, 'training')">Training Model</button>
+    <button class="tab-button" onclick="openTab(event, 'cvhealth')">CV Health Risk</button>
+    <button class="tab-button" onclick="openTab(event, 'power')">Stats Power</button>
+</nav>
+
+<main>
+
+    <!-- SIMULATION 1: METABOLISM (Crossover) -->
+    <div id="metabolism" class="tab-content active">
+        <div class="sim-grid">
+            <div class="controls-panel">
+                <h3>Inputs</h3>
+                <div class="control-group">
+                    <label>Exercise Intensity (% VO₂max)
+                        <span id="met-intensity-val" class="value-display">50</span>
+                    </label>
+                    <input type="range" id="met-intensity" min="20" max="100" value="50" step="5">
+                    <small style="color:#666;">Human range: 20% (Rest) - 100% (Max)</small>
+                </div>
+            </div>
+            <div class="outputs-panel">
+                <div class="chart-container">
+                    <canvas id="metabolismChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIMULATION 2: TRAINING MODEL (Fitness-Fatigue) -->
+    <div id="training" class="tab-content">
+        <div class="sim-grid">
+            <div class="controls-panel">
+                <h3>Weekly Inputs</h3>
+                <div class="control-group">
+                    <label>Training Load (TRIMP)
+                        <span id="train-load-val" class="value-display">100</span>
+                    </label>
+                    <input type="range" id="train-load" min="0" max="300" value="100" step="10">
+                    <small style="color:#666;">0 (Rest) - 300+ (Elite elite hard session)</small>
+                </div>
+            </div>
+            <div class="outputs-panel">
+                <div class="chart-container">
+                    <canvas id="trainingChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIMULATION 3: CV Health Risk -->
+    <div id="cvhealth" class="tab-content">
+        <div class="sim-grid">
+            <div class="controls-panel">
+                <h3>Patient Factors</h3>
+                <div class="control-group">
+                    <label>Systolic Blood Pressure (mmHg)
+                        <span id="bp-val" class="value-display">120</span>
+                    </label>
+                    <input type="range" id="bp" min="90" max="180" value="120" step="1">
+                    <small style="color:#666;">120 (Normal) - 180+ (Crisis)</small>
+                </div>
+                <div class="control-group">
+                    <label>Exercise Days / Week
+                        <span id="exercise-val" class="value-display">3</span>
+                    </label>
+                    <input type="range" id="exercise" min="0" max="7" value="3" step="1">
+                </div>
+            </div>
+            <div class="outputs-panel">
+                <div class="kpi-deck">
+                    <div class="kpi-card"><span class="label">BP Status</span><span id="bp-status" class="value">Normal</span></div>
+                    <div class="kpi-card"><span class="label">Activity Status</span><span id="act-status" class="value">Active</span></div>
+                </div>
+                <div id="risk-gauge-container">
+                    <p>Estimated 10-Year Cardiovascular Risk Score</p>
+                    <div id="risk-gauge-text" class="risk-low">LOW RISK</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIMULATION 4: Statistical Power -->
+    <div id="power" class="tab-content">
+        <div class="sim-grid">
+            <div class="controls-panel">
+                <h3>Study Parameters</h3>
+                <div class="control-group">
+                    <label>Sample Size (N per group)
+                        <span id="sample-val" class="value-display">20</span>
+                    </label>
+                    <input type="range" id="sample" min="5" max="200" value="20" step="5">
+                </div>
+                <div class="control-group">
+                    <label>True Effect Size (Cohen's d)
+                        <span id="effect-val" class="value-display">0.5</span>
+                    </label>
+                    <input type="range" id="effect" min="0" max="1.5" value="0.5" step="0.1">
+                    <small style="color:#666;">0.2 (Small), 0.5 (Mod), 0.8+ (Large)</small>
+                </div>
+            </div>
+            <div class="outputs-panel">
+                <div class="kpi-deck">
+                    <div class="kpi-card" style="background-color: var(--um-purple); border-color: var(--um-gold);">
+                        <span class="label" style="color:var(--um-gold);">Statistical Power</span>
+                        <span id="power-val-display" class="value" style="color:white;">--</span>
+                        <span class="unit" style="color:white;">(1-β)</span>
+                    </div>
+                </div>
+                <div style="font-size:0.9em; color:#555; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                    <strong>Discussion:</strong> Aim for Power > 0.80. Many sports science studies are underpowered (N=10-15), making it hard to detect real effects.
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    // === TAB MANAGEMENT ===
+    function openTab(evt, tabName) {
+        let tabcontent = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].classList.remove("active");
+        }
+        let tabbuttons = document.getElementsByClassName("tab-button");
+        for (let i = 0; i < tabbuttons.length; i++) {
+            tabbuttons[i].classList.remove("active");
+        }
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+
+        // Force chart resize/update on tab show
+        if(tabName === 'metabolism' && metChart) metChart.update();
+        if(tabName === 'training' && trainChart) trainChart.update();
+    }
+
+    // === CHART GLOBAL CONFIG ===
+    Chart.defaults.font.family = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+    Chart.defaults.color = '#333';
+
+    // ==========================================
+    // SIM 1: METABOLISM (Crossover) CODE
+    // ==========================================
+    const ctxMet = document.getElementById('metabolismChart').getContext('2d');
+    const intensitySlider = document.getElementById('met-intensity');
+    const intensityValDisp = document.getElementById('met-intensity-val');
+
+    let metChart = new Chart(ctxMet, {
+        type: 'line',
+        data: {
+            labels: [20, 30, 40, 50, 60, 70, 80, 90, 100],
+            datasets: [{
+                label: '% Energy from Carbohydrate',
+                data: [], // Filled by update
+                borderColor: '#3D1152', // Purple
+                backgroundColor: 'rgba(61, 17, 82, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.3
+            }, {
+                label: '% Energy from Fat',
+                data: [], // Filled by update
+                borderColor: '#FFC629', // Gold
+                backgroundColor: 'rgba(255, 198, 41, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { title: { display: true, text: 'The Crossover Concept' } },
+            scales: {
+                x: { title: { display: true, text: 'Intensity (% VO₂max)' } },
+                y: { min: 0, max: 100, title: { display: true, text: '% Substrate Contribution' } }
+            }
+        }
+    });
+
+    function updateMetabolismSim() {
+        const intensity = parseInt(intensitySlider.value);
+        intensityValDisp.innerText = intensity;
+
+        // Model equations: Simple representation of crossover
+        const intensities = [20, 30, 40, 50, 60, 70, 80, 90, 100];
+        
+        // Fat peaks low, carb rises high
+        const carbData = intensities.map(i => {
+            // Simplified logistic rise of carb use
+            return 100 / (1 + Math.exp(-0.1 * (i - 60)));
+        });
+
+        const fatData = carbData.map(c => 100 - c);
+
+        // Add vertical line at current intensity
+        metChart.data.datasets[0].data = carbData;
+        metChart.data.datasets[1].data = fatData;
+        
+        // Custom vertical line plugin/annotation alternative (simple highlight point)
+        const intensityIndex = intensities.indexOf(intensity);
+        if (intensityIndex !== -1) {
+             metChart.options.plugins.title.text = `The Crossover Concept (@ ${intensity}% VO₂max)`;
+        }
+
+        metChart.update('none'); // Update without animation for smoothness
+    }
+
+    intensitySlider.addEventListener('input', updateMetabolismSim);
+    updateMetabolismSim(); // Init
+
+    // ==========================================
+    // SIM 2: TRAINING MODEL (Fitness-Fatigue) CODE
+    // ==========================================
+    const ctxTrain = document.getElementById('trainingChart').getContext('2d');
+    const loadSlider = document.getElementById('train-load');
+    const loadValDisp = document.getElementById('train-load-val');
+
+    // Model Constants (Banister typical)
+    const tau_f = 45; // Fitness decay days
+    const tau_g = 15; // Fatigue decay days
+    const k_f = 1.0;   // Fitness magnitude
+    const k_g = 2.0;   // Fatigue magnitude
+
+    let fitness = 0;
+    let fatigue = 0;
+    let perfData = [];
+    let fitData = [];
+    let fatData = [];
+    let timeLabels = [];
+
+    let trainChart = new Chart(ctxTrain, {
+        type: 'line',
+        data: {
+            labels: timeLabels,
+            datasets: [
+                { label: 'Performance', data: perfData, borderColor: '#333', borderWidth: 3, tension: 0.1, yAxisID: 'y' },
+                { label: 'Fitness', data: fitData, borderColor: '#2E7D32', borderWidth: 1, borderDash:[5,5], tension: 0.1, yAxisID: 'y' },
+                { label: 'Fatigue', data: fatData, borderColor: '#C62828', borderWidth: 1, borderDash:[5,5], tension: 0.1, yAxisID: 'y' }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { title: { display: true, text: 'Banister Impulse-Response Model' } },
+            scales: {
+                x: { title: { display: true, text: 'Time (Weeks)' } },
+                y: { title: { display: true, text: 'Arbitrary Units' }, beginAtZero: true }
+            }
+        }
+    });
+
+    function updateTrainingSim() {
+        const trimpInput = parseInt(loadSlider.value);
+        loadValDisp.innerText = trimpInput;
+
+        // Reset and simulate
+        fitness = 0; fatigue = 0;
+        perfData = []; fitData = []; fatData = []; timeLabels = [];
+
+        const totalWeeks = 12;
+        const dailyTRIMP = trimpInput / 7; // Simplify: spreading weekly load daily
+
+        for (let day = 0; day <= totalWeeks * 7; day++) {
+            // Formula: next_f = current_f * exp(-1/tau) + LOAD * magnitude
+            fitness = fitness * Math.exp(-1/tau_f) + (dailyTRIMP * k_f);
+            fatigue = fatigue * Math.exp(-1/tau_g) + (dailyTRIMP * k_g);
+            let performance = fitness - fatigue;
+
+            // Sample weekly for chart
+            if (day % 7 === 0) {
+                timeLabels.push(day / 7);
+                fitData.push(fitness.toFixed(1));
+                fatData.push(fatigue.toFixed(1));
+                perfData.push(performance.toFixed(1));
+            }
+        }
+
+        trainChart.data.labels = timeLabels;
+        trainChart.data.datasets[0].data = perfData;
+        trainChart.data.datasets[1].data = fitData;
+        trainChart.data.datasets[2].data = fatData;
+        trainChart.update('none');
+    }
+
+    loadSlider.addEventListener('input', updateTrainingSim);
+    updateTrainingSim(); // Init
+
+
+    // ==========================================
+    // SIM 3: CV HEALTH RISK CODE
+    // ==========================================
+    const bpSlider = document.getElementById('bp');
+    const exSlider = document.getElementById('exercise');
+    
+    function updateCVHealthSim() {
+        const bp = parseInt(bpSlider.value);
+        const ex = parseInt(exSlider.value);
+        document.getElementById('bp-val').innerText = bp;
+        document.getElementById('exercise-val').innerText = ex;
+
+        // Status displays
+        let bpStatus = "Normal";
+        if(bp >= 130) bpStatus = "Hypertension S1";
+        if(bp >= 140) bpStatus = "Hypertension S2";
+        if(bp >= 180) bpStatus = "Crisis";
+        document.getElementById('bp-status').innerText = bpStatus;
+
+        let actStatus = "Inactive";
+        if(ex >= 3) actStatus = "Active";
+        if(ex >= 5) actStatus = "Very Active";
+        document.getElementById('act-status').innerText = actStatus;
+
+        // Super simplified risk scoring algorithm (arbitrary for demo)
+        let riskScore = 0;
+        // BP points
+        if(bp >= 130) riskScore += 2;
+        if(bp >= 140) riskScore += 5;
+        if(bp >= 160) riskScore += 10;
+        // Exercise deduction
+        riskScore -= (ex * 1);
+        
+        let riskLabel = "LOW RISK";
+        let riskClass = "risk-low";
+
+        if(riskScore > 3) { riskLabel = "MODERATE RISK"; riskClass = "risk-mod"; }
+        if(riskScore > 8) { riskLabel = "HIGH RISK"; riskClass = "risk-high"; }
+
+        const gaugeText = document.getElementById('risk-gauge-text');
+        gaugeText.innerText = riskLabel;
+        gaugeText.className = riskClass;
+    }
+
+    bpSlider.addEventListener('input', updateCVHealthSim);
+    exSlider.addEventListener('input', updateCVHealthSim);
+    updateCVHealthSim(); // Init
+
+    // ==========================================
+    // SIM 4: STATISTICAL POWER CODE
+    // ==========================================
+    const sampleSlider = document.getElementById('sample');
+    const effectSlider = document.getElementById('effect');
+
+    function updatePowerSim() {
+        const N = parseInt(sampleSlider.value);
+        const d = parseFloat(effectSlider.value);
+        document.getElementById('sample-val').innerText = N;
+        document.getElementById('effect-val').innerText = d;
+
+        // Basic Statistical Power approximation (1-tailed t-test approximation)
+        // Strictly for pedagogical visualization, not a precise calculator.
+        let power = 0;
+        if(d > 0) {
+            // Basic approximation formula for teaching visualization
+            const criticalT = 1.645; // z approximation for alpha 0.05
+            const standardError = Math.sqrt((1/N) + (1/N)); // assumes equal variance
+            const powerZ = (criticalT - (d / standardError));
+            
+            // NormSInv approximation
+            power = 1 - (1 / (1 + Math.exp(-0.07056 * Math.pow(powerZ, 3) - 1.5976 * powerZ)));
+        }
+
+        const powerDisp = document.getElementById('power-val-display');
+        powerDisp.innerText = power.toFixed(2);
+        
+        // Color coding
+        if(power >= 0.80) { powerDisp.style.color = '#81C784'; } // Green-light
+        else if (power >= 0.50) { powerDisp.style.color = '#FFD54F'; } // Yellow
+        else { powerDisp.style.color = '#E57373'; } // Red-light
+    }
+
+    sampleSlider.addEventListener('input', updatePowerSim);
+    effectSlider.addEventListener('input', updatePowerSim);
+    updatePowerSim(); // Init
+
+</script>
+
+</body>
+</html>
