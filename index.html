@@ -23,80 +23,212 @@
             --text-main: #212529;
             --text-muted: #6C757D;
             --border: #E0E2E8;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg-canvas); color: var(--text-main); line-height: 1.5; padding: 20px; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--bg-canvas); 
+            color: var(--text-main); 
+            line-height: 1.4; 
+            padding: 10px; 
+            overflow-x: hidden; 
+            width: 100%;
+        }
         
-        .container { max-width: 1450px; margin: 0 auto; }
+        .container { 
+            width: 100%; 
+            max-width: 960px; 
+            margin: 0 auto; 
+            overflow-x: hidden;
+        }
 
         /* HEADER */
-        header { background: linear-gradient(135deg, var(--um-purple-dark), var(--um-purple)); color: #FFF; padding: 16px 24px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); margin-bottom: 20px; }
-        header h1 { font-size: 1.5rem; font-weight: 700; color: #FFF; letter-spacing: -0.5px; }
-        header p { color: var(--um-gold-pale); font-size: 0.95rem; margin-top: 2px; }
+        header { 
+            background: linear-gradient(135deg, var(--um-purple-dark), var(--um-purple)); 
+            color: #FFF; 
+            padding: 14px 18px; 
+            border-radius: 10px; 
+            display: flex; 
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: var(--shadow); 
+            margin-bottom: 12px; 
+        }
+        header h1 { font-size: 1.25rem; font-weight: 700; color: #FFF; letter-spacing: -0.3px; }
+        header p { color: var(--um-gold-pale); font-size: 0.82rem; margin-top: 2px; }
         
-        /* LOGO IN TOP RIGHT */
+        /* LOGO IN TOP RIGHT ON WHITE CONTAINER */
         .logo-wrapper { display: flex; align-items: center; justify-content: flex-end; }
-        .logo-img { max-height: 65px; max-width: 200px; object-fit: contain; border-radius: 6px; }
-        .logo-fallback { background: rgba(255, 255, 255, 0.1); border: 1.5px solid var(--um-gold); color: var(--um-gold); padding: 8px 16px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; text-align: right; text-transform: uppercase; letter-spacing: 0.5px; }
+        .logo-container { 
+            background: #FFFFFF; 
+            padding: 4px 10px; 
+            border-radius: 6px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border: 1.5px solid var(--um-gold); 
+        }
+        .logo-img { max-height: 46px; max-width: 150px; object-fit: contain; display: block; }
+        .logo-fallback { 
+            background: rgba(255, 255, 255, 0.1); 
+            border: 1.5px solid var(--um-gold); 
+            color: var(--um-gold); 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            font-weight: 700; 
+            font-size: 0.8rem; 
+            text-align: right; 
+            text-transform: uppercase; 
+        }
 
-        /* GRID */
-        .lab-layout { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
-        @media (max-width: 1024px) { .lab-layout { grid-template-columns: 1fr; } }
+        /* VERTICAL SINGLE-COLUMN FLOW */
+        .lab-layout { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            width: 100%; 
+        }
 
         /* PANELS */
-        .card { background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); box-shadow: var(--shadow); padding: 18px; margin-bottom: 20px; }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 2px solid var(--um-gold-pale); padding-bottom: 6px; }
-        .card-header h2 { font-size: 1.05rem; color: var(--um-purple); text-transform: uppercase; letter-spacing: 0.5px; }
+        .card { 
+            background: var(--card-bg); 
+            border-radius: 8px; 
+            border: 1px solid var(--border); 
+            box-shadow: var(--shadow); 
+            padding: 14px; 
+            width: 100%;
+        }
+        .card-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 10px; 
+            border-bottom: 2px solid var(--um-gold-pale); 
+            padding-bottom: 4px; 
+        }
+        .card-header h2 { font-size: 0.95rem; color: var(--um-purple); text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* CONTROLS */
-        .form-group { margin-bottom: 14px; }
-        .form-group label { display: flex; justify-content: space-between; font-weight: 600; font-size: 0.85rem; color: var(--text-main); margin-bottom: 4px; }
-        .form-group .unit { color: var(--text-muted); font-weight: normal; font-size: 0.78rem; }
+        /* CONTROLS HORIZONTAL COMPACT GRID */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px 16px;
+            align-items: start;
+        }
+
+        .form-group { margin-bottom: 6px; }
+        .form-group label { display: flex; justify-content: space-between; font-weight: 600; font-size: 0.8rem; color: var(--text-main); margin-bottom: 2px; }
+        .form-group .unit { color: var(--text-muted); font-weight: normal; font-size: 0.72rem; }
         .form-group span.val { color: var(--um-purple); font-weight: 700; }
-        input[type="range"] { width: 100%; accent-color: var(--um-purple); cursor: pointer; height: 6px; }
-        select { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border); background: #FFF; font-size: 0.88rem; font-weight: 500; }
+        input[type="range"] { width: 100%; accent-color: var(--um-purple); cursor: pointer; height: 5px; }
+        select { width: 100%; padding: 6px 8px; border-radius: 5px; border: 1px solid var(--border); background: #FFF; font-size: 0.82rem; font-weight: 500; }
 
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        button { cursor: pointer; padding: 10px; font-size: 0.9rem; font-weight: 700; border-radius: 6px; border: none; transition: all 0.2s ease; }
+        .btn-group { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 8px; 
+            margin-top: 10px; 
+            width: 100%;
+        }
+        button { 
+            cursor: pointer; 
+            padding: 9px 14px; 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            border-radius: 6px; 
+            border: none; 
+            transition: all 0.2s ease; 
+            flex: 1 1 180px;
+        }
         .btn-start { background: var(--um-purple); color: #FFF; }
         .btn-start:hover { background: var(--um-purple-light); }
-        .btn-reset { background: #E9ECEF; color: var(--text-main); }
+        .btn-reset { background: #E9ECEF; color: var(--text-main); flex: 0 1 90px; }
         .btn-reset:hover { background: #DEE2E6; }
-        .btn-export { grid-column: span 2; background: var(--um-gold); color: var(--um-purple-dark); margin-top: 5px; }
+        .btn-export { background: var(--um-gold); color: var(--um-purple-dark); flex: 1 1 200px; }
         .btn-export:hover { background: #FFD566; }
 
         /* TELEMETRY DECK */
-        .telemetry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-bottom: 15px; }
-        .metric-tile { background: var(--bg-canvas); border-left: 4px solid var(--um-purple); padding: 8px 10px; border-radius: 6px; }
+        .telemetry-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(95px, 1fr)); 
+            gap: 6px; 
+            margin-bottom: 12px; 
+        }
+        .metric-tile { 
+            background: var(--bg-canvas); 
+            border-left: 3.5px solid var(--um-purple); 
+            padding: 6px 8px; 
+            border-radius: 5px; 
+        }
         .metric-tile.fat { border-left-color: var(--fat-blue); }
         .metric-tile.carb { border-left-color: var(--carb-orange); }
         .metric-tile.gold { border-left-color: var(--um-gold); }
         .metric-tile.lac { border-left-color: var(--lactate-red); }
         .metric-tile.hr { border-left-color: var(--hr-pink); }
         .metric-tile.ve { border-left-color: var(--ve-teal); }
-        .metric-label { font-size: 0.68rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); }
-        .metric-value { font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin-top: 1px; }
-        .metric-unit { font-size: 0.7rem; color: var(--text-muted); font-weight: normal; margin-left: 2px; }
+        .metric-label { font-size: 0.64rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); line-height: 1.1; }
+        .metric-value { font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-top: 1px; }
+        .metric-unit { font-size: 0.65rem; color: var(--text-muted); font-weight: normal; margin-left: 2px; }
 
-        /* CHARTS */
-        .charts-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        @media (max-width: 1100px) { .charts-container { grid-template-columns: 1fr; } }
-        .chart-box { position: relative; height: 300px; }
+        /* CHARTS STACKED RESPONSIVELY */
+        .charts-container { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 12px; 
+            margin-bottom: 12px; 
+            width: 100%;
+        }
+        .chart-box { position: relative; height: 260px; width: 100%; }
 
         /* LAB HIGHLIGHT BANNER */
-        .threshold-banner { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; background: var(--um-gold-pale); border: 1px solid var(--um-gold); border-radius: 8px; padding: 12px 16px; margin-bottom: 15px; }
+        .threshold-banner { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+            gap: 8px; 
+            background: var(--um-gold-pale); 
+            border: 1px solid var(--um-gold); 
+            border-radius: 6px; 
+            padding: 10px 12px; 
+            margin-bottom: 10px; 
+        }
         .threshold-item { display: flex; flex-direction: column; }
-        .threshold-title { font-size: 0.75rem; font-weight: 800; color: var(--um-purple); text-transform: uppercase; }
-        .threshold-val { font-size: 1.1rem; font-weight: 800; color: var(--um-purple-dark); margin-top: 1px; }
-        .threshold-sub { font-size: 0.72rem; color: #665200; }
+        .threshold-title { font-size: 0.7rem; font-weight: 800; color: var(--um-purple); text-transform: uppercase; }
+        .threshold-val { font-size: 0.95rem; font-weight: 800; color: var(--um-purple-dark); margin-top: 1px; }
+        .threshold-sub { font-size: 0.68rem; color: #665200; }
 
-        /* SUMMARY TABLE */
-        .table-responsive { max-height: 250px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.78rem; text-align: right; }
-        th, td { padding: 6px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
-        th { background: #F8F9FA; font-weight: 700; color: var(--um-purple); position: sticky; top: 0; z-index: 1; }
+        /* SUMMARY TABLE (COMPACT & CLEANLY STYLED) */
+        .table-responsive { 
+            width: 100%; 
+            overflow-x: auto; 
+            border: 1px solid var(--border); 
+            border-radius: 6px; 
+            background: #FFF;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            font-size: 0.72rem; 
+            text-align: right; 
+        }
+        th, td { 
+            padding: 5px 6px; 
+            border-bottom: 1px solid var(--border); 
+            white-space: nowrap;
+        }
+        th { 
+            background: #F8F9FA; 
+            font-weight: 700; 
+            color: var(--um-purple); 
+            position: sticky; 
+            top: 0; 
+            z-index: 1; 
+            font-size: 0.7rem;
+        }
         td:first-child, th:first-child { text-align: left; }
         tr:hover { background: rgba(255, 198, 41, 0.1); }
     </style>
@@ -111,22 +243,24 @@
             <p>15-Minute Cardiorespiratory & Substrate Kinetics GXT Simulation</p>
         </div>
         <div class="logo-wrapper">
-            <!-- Directly loads CHP.png from the GitHub repository root -->
-            <img src="CHP.png" alt="College of Health Professions Logo" class="logo-img" onerror="this.style.display='none'; document.getElementById('logo-fallback-box').style.display='block';">
-            <div id="logo-fallback-box" class="logo-fallback" style="display:none;">
-                College of Health Professions
+            <!-- Directly loads CHP.png from the GitHub repository root on a crisp white container -->
+            <div class="logo-container">
+                <img src="CHP.png" alt="College of Health Professions Logo" class="logo-img" onerror="this.style.display='none'; document.getElementById('logo-fallback-box').style.display='block';">
+                <div id="logo-fallback-box" class="logo-fallback" style="display:none; color:var(--um-purple); font-weight:800; font-size:0.85rem;">
+                    College of Health Professions
+                </div>
             </div>
         </div>
     </header>
 
     <div class="lab-layout">
-        <!-- Sidebar Controls -->
-        <aside>
-            <div class="card">
-                <div class="card-header">
-                    <h2>Subject & Protocol</h2>
-                </div>
+        <!-- Panel 1: Subject Setup & Controls -->
+        <section class="card">
+            <div class="card-header">
+                <h2>Subject & Protocol Configuration</h2>
+            </div>
 
+            <div class="controls-grid">
                 <div class="form-group">
                     <label>Fitness Classification</label>
                     <select id="athlete-profile" onchange="resetSimulation()">
@@ -152,44 +286,29 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Resting Heart Rate <span class="unit">(bpm)</span> <span class="val" id="rhr-disp">60</span></label>
+                    <label>Resting HR <span class="unit">(bpm)</span> <span class="val" id="rhr-disp">60</span></label>
                     <input type="range" id="param-rhr" min="40" max="90" value="60" step="1" oninput="updateParamDisp()">
-                </div>
-
-                <div class="form-group">
-                    <label>Protocol Structure</label>
-                    <div style="font-size:0.8rem; background: #F8F9FA; padding: 6px; border-radius: 4px; color:#555; border:1px solid #E0E2E8;">
-                        • <strong>15-Minute Protocol:</strong> 5 stages × 3.0 min<br>
-                        • Stage 1: Warmup (35% VO₂max)<br>
-                        • Stages 2-5: 55%, 72%, 88%, 100% VO₂max
-                    </div>
                 </div>
 
                 <div class="form-group">
                     <label>Playback Speed <span class="val" id="speed-disp">2.5s / stage</span></label>
                     <input type="range" id="param-speed" min="1" max="6" value="2.5" step="0.5" oninput="updateParamDisp()">
-                    <small style="color:var(--text-muted); font-size:0.72rem;">Animation interval per 3-minute stage</small>
-                </div>
-
-                <div class="btn-group">
-                    <button class="btn-start" id="btn-run" onclick="toggleSimulation()">Start 15-min GXT</button>
-                    <button class="btn-reset" onclick="resetSimulation()">Reset</button>
-                    <button class="btn-export" onclick="exportDataCSV()">Export CSV for Lab Report</button>
                 </div>
             </div>
 
-            <!-- Physiological Reference Box -->
-            <div class="card" style="font-size: 0.8rem; color: #555;">
-                <h3 style="color: var(--um-purple); font-size: 0.9rem; margin-bottom: 6px;">Integrated Thresholds</h3>
-                <p>• <strong>ACSM Running:</strong> $\text{VO}_2 = (0.2 \times S) + (0.9 \times S \times G) + 3.5$</p>
-                <p>• <strong>VT1 / LT1:</strong> Aerobic inflection; $\text{V}_E/\text{VO}_2$ rises while $\text{V}_E/\text{VCO}_2$ stays flat (~$\text{RER } 0.85$, $[La^-] \approx 2.0\text{ mM}$).</p>
-                <p>• <strong>VT2 / RCP / LT2:</strong> Hyperventilation threshold; $\text{V}_E/\text{VCO}_2$ surges, $[La^-] > 4.0\text{ mM}$, $\text{RER} > 1.00$.</p>
+            <div class="btn-group">
+                <button class="btn-start" id="btn-run" onclick="toggleSimulation()">Start 15-min GXT</button>
+                <button class="btn-reset" onclick="resetSimulation()">Reset</button>
+                <button class="btn-export" onclick="exportDataCSV()">Export CSV for Lab Report</button>
             </div>
-        </aside>
+        </section>
 
-        <!-- Primary Output Interface -->
-        <main>
-            <!-- Real-time Ergometer & Telemetry -->
+        <!-- Panel 2: Live Ergometer & Telemetry Readings -->
+        <section class="card">
+            <div class="card-header">
+                <h2>Live Telemetry Readings</h2>
+            </div>
+            
             <div class="telemetry-grid">
                 <div class="metric-tile">
                     <div class="metric-label">Time</div>
@@ -198,7 +317,7 @@
                 <div class="metric-tile">
                     <div class="metric-label">Treadmill</div>
                     <div class="metric-value"><span id="live-speed">0.0</span><span class="metric-unit">mph</span></div>
-                    <div style="font-size: 0.72rem; color: var(--text-muted);"><span id="live-grade">0.0</span>% grade</div>
+                    <div style="font-size: 0.65rem; color: var(--text-muted);"><span id="live-grade">0.0</span>% grade</div>
                 </div>
                 <div class="metric-tile hr">
                     <div class="metric-label">Heart Rate</div>
@@ -206,7 +325,7 @@
                 </div>
                 <div class="metric-tile">
                     <div class="metric-label">Rel. VO₂</div>
-                    <div class="metric-value"><span id="live-vo2-rel">0.0</span><span class="metric-unit">mL/kg/m</span></div>
+                    <div class="metric-value"><span id="live-vo2-rel">0.0</span><span class="metric-unit">mL/kg</span></div>
                 </div>
                 <div class="metric-tile">
                     <div class="metric-label">Abs. VO₂</div>
@@ -221,28 +340,28 @@
                     <div class="metric-value"><span id="live-lactate">1.2</span><span class="metric-unit">mM</span></div>
                 </div>
                 <div class="metric-tile ve">
-                    <div class="metric-label">Ventilation (VE)</div>
-                    <div class="metric-value"><span id="live-ve">0.0</span><span class="metric-unit">L/min</span></div>
+                    <div class="metric-label">VE</div>
+                    <div class="metric-value"><span id="live-ve">0.0</span><span class="metric-unit">L/m</span></div>
                 </div>
                 <div class="metric-tile ve">
-                    <div class="metric-label">Tidal Vol (Vt)</div>
+                    <div class="metric-label">Vt</div>
                     <div class="metric-value"><span id="live-vt">0.0</span><span class="metric-unit">L</span></div>
                 </div>
                 <div class="metric-tile ve">
-                    <div class="metric-label">Resp Freq (Rf)</div>
+                    <div class="metric-label">Rf</div>
                     <div class="metric-value"><span id="live-rf">0</span><span class="metric-unit">bpm</span></div>
                 </div>
                 <div class="metric-tile">
-                    <div class="metric-label">Borg RPE</div>
+                    <div class="metric-label">RPE</div>
                     <div class="metric-value" id="live-rpe">6</div>
                 </div>
                 <div class="metric-tile fat">
-                    <div class="metric-label">Fat / Carb %</div>
+                    <div class="metric-label">Fat/Carb%</div>
                     <div class="metric-value"><span id="live-fat-pct">0</span>/<span id="live-carb-pct">0</span><span class="metric-unit">%</span></div>
                 </div>
             </div>
 
-            <!-- Key Threshold Analysis Banner -->
+            <!-- Threshold Analysis Banner -->
             <div class="threshold-banner">
                 <div class="threshold-item">
                     <span class="threshold-title">FATmax Zone</span>
@@ -252,63 +371,76 @@
                 <div class="threshold-item">
                     <span class="threshold-title">VT1 / LT1 (Aerobic Threshold)</span>
                     <span class="threshold-val" id="vt1-summary">-- % VO₂max</span>
-                    <span class="threshold-sub" id="vt1-sub">RER ≈ 0.85 | VE/VO₂ inflection | [La⁻] ≈ 2.0 mM</span>
+                    <span class="threshold-sub" id="vt1-sub">RER ≈ 0.85 | V̇E/VO₂ inflection | [La⁻] ≈ 2.0 mM</span>
                 </div>
                 <div class="threshold-item">
-                    <span class="threshold-title">VT2 / RCP / LT2 (Anaerobic Threshold)</span>
+                    <span class="threshold-title">VT2 / RCP / LT2 (Anaerobic)</span>
                     <span class="threshold-val" id="vt2-summary">-- % VO₂max</span>
-                    <span class="threshold-sub" id="vt2-sub">RER > 1.00 | VE/VCO₂ surge | [La⁻] > 4.0 mM</span>
+                    <span class="threshold-sub" id="vt2-sub">RER > 1.00 | V̇E/VCO₂ surge | [La⁻] > 4.0 mM</span>
                 </div>
             </div>
+        </section>
 
-            <!-- Dynamic Graphical Display -->
+        <!-- Physiological Reference Box (Clean UTF-8 Characters) -->
+        <section class="card" style="font-size: 0.8rem; color: #555;">
+            <h3 style="color: var(--um-purple); font-size: 0.9rem; margin-bottom: 6px;">Integrated Thresholds</h3>
+            <p style="margin-bottom: 4px;">• <strong>ACSM Running:</strong> VO₂ = (0.2 × S) + (0.9 × S × G) + 3.5</p>
+            <p style="margin-bottom: 4px;">• <strong>VT1 / LT1:</strong> Aerobic inflection; V̇E/VO₂ rises while V̇E/VCO₂ stays flat (~RER 0.85, [La⁻] ≈ 2.0 mM).</p>
+            <p>• <strong>VT2 / RCP / LT2:</strong> Hyperventilation threshold; V̇E/VCO₂ surges, [La⁻] > 4.0 mM, RER > 1.00.</p>
+        </section>
+
+        <!-- Panel 3: Graphical Visualizations (Stacked Vertically) -->
+        <section class="card">
+            <div class="card-header">
+                <h2>Metabolic & Ventilatory Plots</h2>
+            </div>
             <div class="charts-container">
-                <div class="card chart-box">
+                <div class="chart-box">
                     <canvas id="crossoverChart"></canvas>
                 </div>
-                <div class="card chart-box">
+                <div class="chart-box" style="margin-top: 15px;">
                     <canvas id="ventilatoryKineticsChart"></canvas>
                 </div>
             </div>
+        </section>
 
-            <!-- Protocol Step Summary Table -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>15-Minute Graded Exercise Protocol Log (5 Stages × 3 Minutes)</h2>
-                </div>
-                <div class="table-responsive">
-                    <table id="data-table">
-                        <thead>
-                            <tr>
-                                <th>Stage</th>
-                                <th>Time</th>
-                                <th>Speed (mph)</th>
-                                <th>Grade (%)</th>
-                                <th>% VO₂max</th>
-                                <th>VO₂ (mL/kg/min)</th>
-                                <th>VO₂ (L/min)</th>
-                                <th>VCO₂ (L/min)</th>
-                                <th>RER</th>
-                                <th>HR (bpm)</th>
-                                <th>[La⁻] (mM)</th>
-                                <th>VE (L/min)</th>
-                                <th>Vt (L)</th>
-                                <th>Rf (br/min)</th>
-                                <th>VE/VO₂</th>
-                                <th>VE/VCO₂</th>
-                                <th>RPE</th>
-                                <th>Fat (g/min)</th>
-                                <th>CHO (g/min)</th>
-                                <th>Total (kcal/min)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="data-table-body">
-                            <!-- Populated dynamically via JS -->
-                        </tbody>
-                    </table>
-                </div>
+        <!-- Panel 4: Complete Protocol Log Table -->
+        <section class="card">
+            <div class="card-header">
+                <h2>15-Minute Graded Exercise Protocol Log (5 Stages × 3 Minutes)</h2>
             </div>
-        </main>
+            <div class="table-responsive">
+                <table id="data-table">
+                    <thead>
+                        <tr>
+                            <th>Stage</th>
+                            <th>Time</th>
+                            <th>Speed</th>
+                            <th>Grade</th>
+                            <th>% VO₂</th>
+                            <th>VO₂ (mL/kg/m)</th>
+                            <th>VO₂ (L/m)</th>
+                            <th>VCO₂ (L/m)</th>
+                            <th>RER</th>
+                            <th>HR</th>
+                            <th>[La⁻]</th>
+                            <th>VE</th>
+                            <th>Vt</th>
+                            <th>Rf</th>
+                            <th>VE/VO₂</th>
+                            <th>VE/VCO₂</th>
+                            <th>RPE</th>
+                            <th>Fat(g)</th>
+                            <th>CHO(g)</th>
+                            <th>Total (kcal)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-table-body">
+                        <!-- Populated dynamically via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </div>
 </div>
 
@@ -389,18 +521,18 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                title: { display: true, text: 'Substrate Crossover & Blood Lactate Kinetics', font: { size: 13, weight: 'bold' } },
+                title: { display: true, text: 'Substrate Crossover & Blood Lactate Kinetics', font: { size: 12, weight: 'bold' } },
                 tooltip: { mode: 'index', intersect: false }
             },
             scales: {
-                x: { title: { display: true, text: 'Stage Intensity (% VO₂max)' } },
-                y: { min: 0, max: 100, title: { display: true, text: '% Energy Contribution' } },
+                x: { title: { display: true, text: 'Intensity (% VO₂max)', font: { size: 11 } } },
+                y: { min: 0, max: 100, title: { display: true, text: '% Energy', font: { size: 11 } } },
                 yLactate: {
                     type: 'linear',
                     position: 'right',
                     min: 0,
                     max: 14,
-                    title: { display: true, text: '[La⁻] (mmol/L)', color: LACTATE_RED },
+                    title: { display: true, text: '[La⁻] (mM)', color: LACTATE_RED, font: { size: 11 } },
                     grid: { drawOnChartArea: false }
                 }
             }
@@ -458,24 +590,24 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                title: { display: true, text: 'Ventilatory Thresholds (VT1 / VT2) & Heart Rate', font: { size: 13, weight: 'bold' } },
+                title: { display: true, text: 'Ventilatory Thresholds (VT1 / VT2) & Heart Rate', font: { size: 12, weight: 'bold' } },
                 tooltip: { mode: 'index', intersect: false }
             },
             scales: {
-                x: { title: { display: true, text: 'Stage Intensity (% VO₂max)' } },
+                x: { title: { display: true, text: 'Intensity (% VO₂max)', font: { size: 11 } } },
                 yVE: {
                     type: 'linear',
                     position: 'left',
                     min: 0,
                     max: 160,
-                    title: { display: true, text: 'VE (L/min)', color: VE_TEAL }
+                    title: { display: true, text: 'VE (L/min)', color: VE_TEAL, font: { size: 11 } }
                 },
                 yEquiv: {
                     type: 'linear',
                     position: 'right',
                     min: 15,
                     max: 55,
-                    title: { display: true, text: 'Ventilatory Equivalents', color: UM_PURPLE },
+                    title: { display: true, text: 'Ventilatory Equivalents', color: UM_PURPLE, font: { size: 11 } },
                     grid: { drawOnChartArea: false }
                 },
                 yHR: {
