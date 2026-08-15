@@ -15,6 +15,7 @@
             --um-gold-pale: #FFF4D4;
             --fat-blue: #0288D1;
             --carb-orange: #E64A19;
+            --lactate-red: #D32F2F;
             --bg-canvas: #F4F5F8;
             --card-bg: #FFFFFF;
             --text-main: #212529;
@@ -26,13 +27,17 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg-canvas); color: var(--text-main); line-height: 1.5; padding: 20px; }
         
-        .container { max-width: 1300px; margin: 0 auto; }
+        .container { max-width: 1350px; margin: 0 auto; }
 
         /* HEADER */
-        header { background: linear-gradient(135deg, var(--um-purple-dark), var(--um-purple)); color: #FFF; padding: 24px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); margin-bottom: 20px; }
+        header { background: linear-gradient(135deg, var(--um-purple-dark), var(--um-purple)); color: #FFF; padding: 20px 24px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); margin-bottom: 20px; }
         header h1 { font-size: 1.6rem; font-weight: 700; color: #FFF; letter-spacing: -0.5px; }
         header p { color: var(--um-gold-pale); font-size: 0.95rem; margin-top: 4px; }
-        .logo-badge { background: rgba(255, 255, 255, 0.1); border: 2px solid var(--um-gold); color: var(--um-gold); padding: 8px 16px; border-radius: 8px; font-weight: 800; font-size: 0.9rem; text-align: right; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* LOGO CONTAINER WITH FALLBACK */
+        .logo-wrapper { display: flex; align-items: center; justify-content: flex-end; }
+        .logo-img { max-height: 65px; max-width: 180px; object-fit: contain; border-radius: 6px; }
+        .logo-fallback { background: rgba(255, 255, 255, 0.1); border: 2px solid var(--um-gold); color: var(--um-gold); padding: 8px 16px; border-radius: 8px; font-weight: 800; font-size: 0.85rem; text-align: right; text-transform: uppercase; letter-spacing: 0.5px; }
 
         /* GRID */
         .lab-layout { display: grid; grid-template-columns: 340px 1fr; gap: 20px; }
@@ -61,13 +66,14 @@
         .btn-export:hover { background: #FFD566; }
 
         /* TELEMETRY DECK */
-        .telemetry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 20px; }
-        .metric-tile { background: var(--bg-canvas); border-left: 4px solid var(--um-purple); padding: 12px; border-radius: 6px; }
+        .telemetry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(115px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .metric-tile { background: var(--bg-canvas); border-left: 4px solid var(--um-purple); padding: 10px 12px; border-radius: 6px; }
         .metric-tile.fat { border-left-color: var(--fat-blue); }
         .metric-tile.carb { border-left-color: var(--carb-orange); }
         .metric-tile.gold { border-left-color: var(--um-gold); }
-        .metric-label { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); }
-        .metric-value { font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin-top: 2px; }
+        .metric-tile.lac { border-left-color: var(--lactate-red); }
+        .metric-label { font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); }
+        .metric-value { font-size: 1.35rem; font-weight: 800; color: var(--text-main); margin-top: 2px; }
         .metric-unit { font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-left: 2px; }
 
         /* CHARTS */
@@ -83,9 +89,9 @@
         .threshold-sub { font-size: 0.78rem; color: #665200; }
 
         /* SUMMARY TABLE */
-        .table-responsive { max-height: 220px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; margin-top: 15px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: right; }
-        th, td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+        .table-responsive { max-height: 240px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; margin-top: 15px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: right; }
+        th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
         th { background: #F8F9FA; font-weight: 700; color: var(--um-purple); position: sticky; top: 0; z-index: 1; }
         td:first-child, th:first-child { text-align: left; }
         tr:hover { background: rgba(255, 198, 41, 0.1); }
@@ -98,10 +104,14 @@
     <header>
         <div>
             <h1>Substrate Oxidation & FATmax Lab Simulation</h1>
-            <p>Department of Exercise & Nutrition Science • College of Health Professions (Montevallo-Simulations)</p>
+            <p>Department of Exercise & Nutrition Science • College of Health Professions</p>
         </div>
-        <div class="logo-badge">
-            Univ. of Montevallo
+        <div class="logo-wrapper">
+            <!-- Looks for logo.png in the GitHub repo root; displays styled text fallback if not found -->
+            <img src="logo.png" alt="University of Montevallo Logo" class="logo-img" onerror="this.style.display='none'; document.getElementById('logo-fallback-box').style.display='block';">
+            <div id="logo-fallback-box" class="logo-fallback" style="display:none;">
+                Montevallo-Simulations
+            </div>
         </div>
     </header>
 
@@ -153,13 +163,13 @@
 
             <!-- Physiological Notes -->
             <div class="card" style="font-size: 0.85rem; color: #555;">
-                <h3 style="color: var(--um-purple); font-size: 0.95rem; margin-bottom: 8px;">Calorimetry Equations</h3>
+                <h3 style="color: var(--um-purple); font-size: 0.95rem; margin-bottom: 8px;">Calorimetry & Kinetics</h3>
                 <p>• <strong>RER</strong> = VCO₂ / VO₂</p>
                 <p>• <strong>Fat (g/min)</strong> = 1.67·VO₂ - 1.67·VCO₂</p>
                 <p>• <strong>Carb (g/min)</strong> = 4.55·VCO₂ - 3.21·VO₂</p>
-                <p>• <strong>Fat (kcal/min)</strong> = Fat (g/min) × 9.0</p>
-                <p>• <strong>Carb (kcal/min)</strong> = CHO (g/min) × 4.0</p>
-                <p>• <strong>Non-protein RER assumption</strong> (Frayn / Péronnet & Massicotte).</p>
+                <p>• <strong>[La⁻] Baseline:</strong> ~1.0-1.8 mmol/L</p>
+                <p>• <strong>LT₁ / LT₂:</strong> ~2.0 & ~4.0 mmol/L thresholds</p>
+                <p>• <strong>Borg RPE:</strong> 6 (Rest) to 20 (Maximal effort)</p>
             </div>
         </aside>
 
@@ -168,35 +178,39 @@
             <!-- Real-time Telemetry -->
             <div class="telemetry-grid">
                 <div class="metric-tile">
-                    <div class="metric-label">Elapsed Time</div>
+                    <div class="metric-label">Time</div>
                     <div class="metric-value"><span id="live-time">0</span><span class="metric-unit">min</span></div>
                 </div>
                 <div class="metric-tile">
                     <div class="metric-label">Intensity</div>
-                    <div class="metric-value"><span id="live-intensity">0</span><span class="metric-unit">% VO₂max</span></div>
+                    <div class="metric-value"><span id="live-intensity">0</span><span class="metric-unit">%</span></div>
                 </div>
                 <div class="metric-tile">
-                    <div class="metric-label">VO₂ Rate</div>
-                    <div class="metric-value"><span id="live-vo2">0.00</span><span class="metric-unit">L/min</span></div>
+                    <div class="metric-label">VO₂</div>
+                    <div class="metric-value"><span id="live-vo2">0.00</span><span class="metric-unit">L/m</span></div>
                 </div>
                 <div class="metric-tile">
-                    <div class="metric-label">VCO₂ Rate</div>
-                    <div class="metric-value"><span id="live-vco2">0.00</span><span class="metric-unit">L/min</span></div>
+                    <div class="metric-label">VCO₂</div>
+                    <div class="metric-value"><span id="live-vco2">0.00</span><span class="metric-unit">L/m</span></div>
                 </div>
                 <div class="metric-tile gold">
                     <div class="metric-label">RER</div>
                     <div class="metric-value" id="live-rer">0.70</div>
                 </div>
+                <div class="metric-tile lac">
+                    <div class="metric-label">Lactate</div>
+                    <div class="metric-value"><span id="live-lactate">1.2</span><span class="metric-unit">mM</span></div>
+                </div>
                 <div class="metric-tile">
-                    <div class="metric-label">Total Energy</div>
-                    <div class="metric-value"><span id="live-kcal-min">0.0</span><span class="metric-unit">kcal/min</span></div>
+                    <div class="metric-label">Borg RPE</div>
+                    <div class="metric-value" id="live-rpe">6</div>
                 </div>
                 <div class="metric-tile fat">
-                    <div class="metric-label">Fat Energy</div>
+                    <div class="metric-label">Fat %</div>
                     <div class="metric-value"><span id="live-fat-pct">0</span><span class="metric-unit">%</span></div>
                 </div>
                 <div class="metric-tile carb">
-                    <div class="metric-label">Carb Energy</div>
+                    <div class="metric-label">Carb %</div>
                     <div class="metric-value"><span id="live-carb-pct">0</span><span class="metric-unit">%</span></div>
                 </div>
             </div>
@@ -240,6 +254,8 @@
                                 <th>VO₂ (L/min)</th>
                                 <th>VCO₂ (L/min)</th>
                                 <th>RER</th>
+                                <th>[La⁻] (mmol/L)</th>
+                                <th>RPE (6-20)</th>
                                 <th>Fat (g/min)</th>
                                 <th>CHO (g/min)</th>
                                 <th>Fat (kcal/min)</th>
@@ -285,6 +301,7 @@
     const UM_GOLD = '#FFC629';
     const FAT_BLUE = '#0288D1';
     const CARB_ORANGE = '#E64A19';
+    const LACTATE_RED = '#D32F2F';
 
     // --- INITIALIZE CHARTS ---
     const ctxCrossover = document.getElementById('crossoverChart').getContext('2d');
@@ -340,7 +357,8 @@
                     borderWidth: 2.5,
                     data: [],
                     fill: true,
-                    tension: 0.3
+                    tension: 0.3,
+                    yAxisID: 'y'
                 },
                 {
                     label: 'Carbohydrate (kcal/min)',
@@ -349,16 +367,19 @@
                     borderWidth: 2.5,
                     data: [],
                     fill: true,
-                    tension: 0.3
+                    tension: 0.3,
+                    yAxisID: 'y'
                 },
                 {
-                    label: 'Total Energy (kcal/min)',
-                    borderColor: UM_PURPLE,
-                    borderWidth: 2,
-                    borderDash: [5, 5],
+                    label: 'Blood Lactate (mmol/L)',
+                    borderColor: LACTATE_RED,
+                    backgroundColor: 'transparent',
+                    borderWidth: 2.5,
+                    borderDash: [4, 4],
                     data: [],
                     fill: false,
-                    tension: 0.3
+                    tension: 0.3,
+                    yAxisID: 'yLactate'
                 }
             ]
         },
@@ -366,24 +387,33 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                title: { display: true, text: 'Absolute Energy Expenditure Rates', font: { size: 14, weight: 'bold', family: 'sans-serif' } },
+                title: { display: true, text: 'Absolute Energy & Lactate Kinetics', font: { size: 14, weight: 'bold', family: 'sans-serif' } },
                 tooltip: { mode: 'index', intersect: false }
             },
             scales: {
                 x: { title: { display: true, text: 'Exercise Intensity (% VO₂max)' } },
-                y: { min: 0, title: { display: true, text: 'Oxidation Rate (kcal/min)' } }
+                y: { min: 0, title: { display: true, text: 'Oxidation Rate (kcal/min)' } },
+                yLactate: {
+                    type: 'linear',
+                    position: 'right',
+                    min: 0,
+                    max: 14,
+                    title: { display: true, text: 'Blood Lactate (mmol/L)', color: LACTATE_RED },
+                    grid: { drawOnChartArea: false }
+                }
             }
         }
     });
 
-    // --- MATHEMATICAL MODEL CALCULATION (Indirect Calorimetry) ---
+    // --- MATHEMATICAL MODEL CALCULATION ---
     function calculateStageMetabolism(intensityPct, bodyMass, vo2maxRelative, profile, stageIndex, stageDurationMin) {
         const absVO2Max = (vo2maxRelative * bodyMass) / 1000;
         const currentVO2 = (intensityPct / 100) * absVO2Max;
 
         let shiftFactor = 0;
-        if (profile === 'trained') shiftFactor = -0.06;
-        if (profile === 'sedentary') shiftFactor = 0.05;
+        let ltShift = 0;
+        if (profile === 'trained') { shiftFactor = -0.06; ltShift = 0.12; }
+        if (profile === 'sedentary') { shiftFactor = 0.05; ltShift = -0.10; }
 
         let normalizedIntensity = intensityPct / 100;
         let baseRER = 0.72 + (0.42 / (1 + Math.exp(-6 * (normalizedIntensity - 0.65))));
@@ -397,6 +427,7 @@
 
         const currentVCO2 = currentVO2 * currentRER;
 
+        // Frayn Equations
         let fatGramsMin = Math.max(0, (1.67 * currentVO2) - (1.67 * currentVCO2));
         let choGramsMin = Math.max(0, (4.55 * currentVCO2) - (3.21 * currentVO2));
 
@@ -415,6 +446,15 @@
             fatKcalMin = 0;
         }
 
+        // Blood Lactate (mmol/L) exponential threshold kinetics
+        let ltExponent = Math.max(0, (normalizedIntensity - (0.50 + ltShift)) * 7);
+        let bloodLactate = 1.1 + Math.pow(normalizedIntensity, 2) * 0.5 + Math.exp(ltExponent) * 0.18;
+        if (normalizedIntensity >= 1.0) bloodLactate = Math.min(13.5, bloodLactate);
+
+        // Borg 6-20 RPE
+        let rpe = Math.round(6 + (normalizedIntensity * 14));
+        rpe = Math.min(20, Math.max(6, rpe));
+
         const cumulativeMinutes = (stageIndex + 1) * stageDurationMin;
 
         return {
@@ -424,6 +464,8 @@
             vo2: currentVO2,
             vco2: currentVCO2,
             rer: currentRER,
+            lactate: bloodLactate,
+            rpe: rpe,
             pctFat: pctFat,
             pctCarb: pctCarb,
             fatGrams: fatGramsMin,
@@ -456,7 +498,8 @@
         document.getElementById('live-vo2').innerText = data.vo2.toFixed(2);
         document.getElementById('live-vco2').innerText = data.vco2.toFixed(2);
         document.getElementById('live-rer').innerText = data.rer.toFixed(2);
-        document.getElementById('live-kcal-min').innerText = data.totalKcal.toFixed(1);
+        document.getElementById('live-lactate').innerText = data.lactate.toFixed(1);
+        document.getElementById('live-rpe').innerText = data.rpe;
         document.getElementById('live-fat-pct').innerText = data.pctFat.toFixed(0);
         document.getElementById('live-carb-pct').innerText = data.pctCarb.toFixed(0);
 
@@ -469,7 +512,7 @@
             document.getElementById('fatmax-rate-sub').innerText = `Rate: ${maxFatRate.toFixed(2)} g/min (${fatMaxKcal.toFixed(1)} kcal/min)`;
         }
 
-        // Track Crossover Point (first stage where CHO% >= Fat%)
+        // Track Crossover Point
         if (crossoverIntensity === null && data.pctCarb >= 50) {
             crossoverIntensity = data.intensityPct;
             document.getElementById('crossover-summary').innerText = `~${crossoverIntensity}% VO₂max`;
@@ -485,7 +528,7 @@
         absoluteOxChart.data.labels.push(`${data.intensityPct}%`);
         absoluteOxChart.data.datasets[0].data.push(data.fatKcal.toFixed(1));
         absoluteOxChart.data.datasets[1].data.push(data.choKcal.toFixed(1));
-        absoluteOxChart.data.datasets[2].data.push(data.totalKcal.toFixed(1));
+        absoluteOxChart.data.datasets[2].data.push(data.lactate.toFixed(2));
         absoluteOxChart.update();
 
         // Add to Table
@@ -504,6 +547,8 @@
             <td>${d.vo2.toFixed(2)}</td>
             <td>${d.vco2.toFixed(2)}</td>
             <td style="font-weight:700; color:var(--um-purple);">${d.rer.toFixed(2)}</td>
+            <td style="color:${LACTATE_RED}; font-weight:700;">${d.lactate.toFixed(2)}</td>
+            <td style="font-weight:700;">${d.rpe}</td>
             <td>${d.fatGrams.toFixed(2)}</td>
             <td>${d.choGrams.toFixed(2)}</td>
             <td style="color:${FAT_BLUE}; font-weight:600;">${d.fatKcal.toFixed(1)}</td>
@@ -561,7 +606,8 @@
         document.getElementById('live-vo2').innerText = '0.00';
         document.getElementById('live-vco2').innerText = '0.00';
         document.getElementById('live-rer').innerText = '0.70';
-        document.getElementById('live-kcal-min').innerText = '0.0';
+        document.getElementById('live-lactate').innerText = '1.2';
+        document.getElementById('live-rpe').innerText = '6';
         document.getElementById('live-fat-pct').innerText = '0';
         document.getElementById('live-carb-pct').innerText = '0';
         document.getElementById('fatmax-summary').innerText = '-- % VO₂max';
@@ -596,17 +642,17 @@
             return;
         }
 
-        let csv = 'Stage,Time (min),%VO2max,VO2 (L/min),VCO2 (L/min),RER,Fat Oxidation (g/min),CHO Oxidation (g/min),Fat Energy (kcal/min),CHO Energy (kcal/min),Total Energy (kcal/min),% Fat Energy,% CHO Energy\n';
+        let csv = 'Stage,Time (min),%VO2max,VO2 (L/min),VCO2 (L/min),RER,Blood Lactate (mmol/L),Borg RPE (6-20),Fat Oxidation (g/min),CHO Oxidation (g/min),Fat Energy (kcal/min),CHO Energy (kcal/min),Total Energy (kcal/min),% Fat Energy,% CHO Energy\n';
         
         recordedData.forEach((d) => {
-            csv += `${d.stage},${d.timeMin},${d.intensityPct},${d.vo2.toFixed(3)},${d.vco2.toFixed(3)},${d.rer.toFixed(3)},${d.fatGrams.toFixed(3)},${d.choGrams.toFixed(3)},${d.fatKcal.toFixed(2)},${d.choKcal.toFixed(2)},${d.totalKcal.toFixed(2)},${d.pctFat.toFixed(1)},${d.pctCarb.toFixed(1)}\n`;
+            csv += `${d.stage},${d.timeMin},${d.intensityPct},${d.vo2.toFixed(3)},${d.vco2.toFixed(3)},${d.rer.toFixed(3)},${d.lactate.toFixed(2)},${d.rpe},${d.fatGrams.toFixed(3)},${d.choGrams.toFixed(3)},${d.fatKcal.toFixed(2)},${d.choKcal.toFixed(2)},${d.totalKcal.toFixed(2)},${d.pctFat.toFixed(1)},${d.pctCarb.toFixed(1)}\n`;
         });
 
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.setAttribute('href', url);
-        link.setAttribute('download', `Montevallo_Crossover_Lab_Data_${document.getElementById('athlete-profile').value}.csv`);
+        link.setAttribute('download', `Montevallo_GXT_Crossover_Lactate_Data_${document.getElementById('athlete-profile').value}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
