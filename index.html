@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Montevallo-Simulations | Substrate Crossover & FATmax Lab</title>
-    <!-- Chart.js for metabolic graph generation -->
+    <title>Substrate Crossover & FATmax Lab Simulation | Montevallo-Simulations</title>
+    <!-- Chart.js for metabolic curves -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -97,8 +97,8 @@
     <!-- Header -->
     <header>
         <div>
-            <h1>Montevallo-Simulations: Crossover Concept Lab</h1>
-            <p>Department of Exercise & Nutrition Science • College of Health Professions</p>
+            <h1>Substrate Oxidation & FATmax Lab Simulation</h1>
+            <p>Department of Exercise & Nutrition Science • College of Health Professions (Montevallo-Simulations)</p>
         </div>
         <div class="logo-badge">
             Univ. of Montevallo
@@ -133,9 +133,15 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Stage Duration <span class="unit">(seconds)</span> <span class="val" id="stage-dur-disp">3</span></label>
-                    <input type="range" id="param-stage-dur" min="1" max="10" value="3" step="1" oninput="updateParamDisp()">
-                    <small style="color:var(--text-muted); font-size:0.75rem;">Simulated seconds per 3-min GXT stage</small>
+                    <label>Stage Duration <span class="unit">(minutes)</span> <span class="val" id="stage-dur-disp">3</span></label>
+                    <input type="range" id="param-stage-dur" min="1" max="5" value="3" step="1" oninput="updateParamDisp()">
+                    <small style="color:var(--text-muted); font-size:0.75rem;">Standard GXT protocol: 3 min stages</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Simulation Playback Speed <span class="val" id="speed-disp">2s / stage</span></label>
+                    <input type="range" id="param-speed" min="1" max="5" value="2" step="1" oninput="updateParamDisp()">
+                    <small style="color:var(--text-muted); font-size:0.75rem;">Animation interval speed for classroom display</small>
                 </div>
 
                 <div class="btn-group">
@@ -151,7 +157,9 @@
                 <p>• <strong>RER</strong> = VCO₂ / VO₂</p>
                 <p>• <strong>Fat (g/min)</strong> = 1.67·VO₂ - 1.67·VCO₂</p>
                 <p>• <strong>Carb (g/min)</strong> = 4.55·VCO₂ - 3.21·VO₂</p>
-                <p>• <strong>Non-protein RER assumption</strong> (Frayn / Péronnet & Massicotte equations).</p>
+                <p>• <strong>Fat (kcal/min)</strong> = Fat (g/min) × 9.0</p>
+                <p>• <strong>Carb (kcal/min)</strong> = CHO (g/min) × 4.0</p>
+                <p>• <strong>Non-protein RER assumption</strong> (Frayn / Péronnet & Massicotte).</p>
             </div>
         </aside>
 
@@ -159,6 +167,10 @@
         <main>
             <!-- Real-time Telemetry -->
             <div class="telemetry-grid">
+                <div class="metric-tile">
+                    <div class="metric-label">Elapsed Time</div>
+                    <div class="metric-value"><span id="live-time">0</span><span class="metric-unit">min</span></div>
+                </div>
                 <div class="metric-tile">
                     <div class="metric-label">Intensity</div>
                     <div class="metric-value"><span id="live-intensity">0</span><span class="metric-unit">% VO₂max</span></div>
@@ -176,7 +188,7 @@
                     <div class="metric-value" id="live-rer">0.70</div>
                 </div>
                 <div class="metric-tile">
-                    <div class="metric-label">Total Burn</div>
+                    <div class="metric-label">Total Energy</div>
                     <div class="metric-value"><span id="live-kcal-min">0.0</span><span class="metric-unit">kcal/min</span></div>
                 </div>
                 <div class="metric-tile fat">
@@ -223,6 +235,7 @@
                         <thead>
                             <tr>
                                 <th>Stage</th>
+                                <th>Time (min)</th>
                                 <th>% VO₂max</th>
                                 <th>VO₂ (L/min)</th>
                                 <th>VCO₂ (L/min)</th>
@@ -264,6 +277,7 @@
         document.getElementById('bm-disp').innerText = document.getElementById('param-bm').value;
         document.getElementById('vo2max-disp').innerText = document.getElementById('param-vo2max').value;
         document.getElementById('stage-dur-disp').innerText = document.getElementById('param-stage-dur').value;
+        document.getElementById('speed-disp').innerText = document.getElementById('param-speed').value + 's / stage';
     }
 
     // --- COLOR CONSTANTS ---
@@ -363,57 +377,49 @@
     });
 
     // --- MATHEMATICAL MODEL CALCULATION (Indirect Calorimetry) ---
-    function calculateStageMetabolism(intensityPct, bodyMass, vo2maxRelative, profile) {
-        // Absolute VO2 in L/min
+    function calculateStageMetabolism(intensityPct, bodyMass, vo2maxRelative, profile, stageIndex, stageDurationMin) {
         const absVO2Max = (vo2maxRelative * bodyMass) / 1000;
         const currentVO2 = (intensityPct / 100) * absVO2Max;
 
-        // Baseline profile parameter offsets
-        let shiftFactor = 0; // Trained shifts RER down (sparing glycogen)
+        let shiftFactor = 0;
         if (profile === 'trained') shiftFactor = -0.06;
         if (profile === 'sedentary') shiftFactor = 0.05;
 
-        // RER modeling: non-linear sigmoidal rise from resting 0.73-0.78 to 1.10+ at 100% VO2max
         let normalizedIntensity = intensityPct / 100;
         let baseRER = 0.72 + (0.42 / (1 + Math.exp(-6 * (normalizedIntensity - 0.65))));
         let currentRER = Math.min(1.15, Math.max(0.70, baseRER + shiftFactor));
 
-        // Constrain RER for standard non-protein substrate equations (Frayn / Péronnet & Massicotte)
         let cappedRER = Math.min(1.00, Math.max(0.707, currentRER));
 
-        // Substrate percentages based on Zuntz-Schumberg / Lusk table equation
         let pctCarb = ((cappedRER - 0.707) / (1.00 - 0.707)) * 100;
         if (currentRER > 1.0) pctCarb = 100;
         let pctFat = 100 - pctCarb;
 
-        // VCO2 L/min
         const currentVCO2 = currentVO2 * currentRER;
 
-        // Frayn Stoichiometric Equations (grams per minute)
-        // Fat (g/min) = 1.67 * VO2 - 1.67 * VCO2
-        // CHO (g/min) = 4.55 * VCO2 - 3.21 * VO2
         let fatGramsMin = Math.max(0, (1.67 * currentVO2) - (1.67 * currentVCO2));
         let choGramsMin = Math.max(0, (4.55 * currentVCO2) - (3.21 * currentVO2));
 
         if (currentRER >= 1.0) {
             fatGramsMin = 0;
-            // When RER >= 1.0, all caloric burn is carbohydrate derived
             choGramsMin = (currentVO2 * 5.05) / 4.184;
         }
 
-        // Caloric equivalents: Fat = 9.0 kcal/g, Carbohydrate = 4.0 kcal/g
         let fatKcalMin = fatGramsMin * 9.0;
         let choKcalMin = choGramsMin * 4.0;
         let totalKcalMin = fatKcalMin + choKcalMin;
 
-        // If above 1.0 RER, total kcal scales directly with VO2 caloric equivalent (~5.05 kcal/L)
         if (totalKcalMin === 0 || currentRER >= 1.0) {
             totalKcalMin = currentVO2 * 5.05;
             choKcalMin = totalKcalMin;
             fatKcalMin = 0;
         }
 
+        const cumulativeMinutes = (stageIndex + 1) * stageDurationMin;
+
         return {
+            stage: stageIndex + 1,
+            timeMin: cumulativeMinutes,
             intensityPct,
             vo2: currentVO2,
             vco2: currentVCO2,
@@ -439,11 +445,13 @@
         const bodyMass = parseFloat(document.getElementById('param-bm').value);
         const vo2max = parseFloat(document.getElementById('param-vo2max').value);
         const profile = document.getElementById('athlete-profile').value;
+        const stageDurationMin = parseInt(document.getElementById('param-stage-dur').value);
 
-        const data = calculateStageMetabolism(intensity, bodyMass, vo2max, profile);
+        const data = calculateStageMetabolism(intensity, bodyMass, vo2max, profile, currentStageIndex, stageDurationMin);
         recordedData.push(data);
 
         // Update live telemetry HUD
+        document.getElementById('live-time').innerText = data.timeMin;
         document.getElementById('live-intensity').innerText = data.intensityPct;
         document.getElementById('live-vo2').innerText = data.vo2.toFixed(2);
         document.getElementById('live-vco2').innerText = data.vco2.toFixed(2);
@@ -465,7 +473,7 @@
         if (crossoverIntensity === null && data.pctCarb >= 50) {
             crossoverIntensity = data.intensityPct;
             document.getElementById('crossover-summary').innerText = `~${crossoverIntensity}% VO₂max`;
-            document.getElementById('crossover-sub').innerText = `Equal Substrate Split (RER ≈ 0.85)`;
+            document.getElementById('crossover-sub').innerText = `Equilibrium RER = 0.85`;
         }
 
         // Update Charts
@@ -481,16 +489,17 @@
         absoluteOxChart.update();
 
         // Add to Table
-        appendTableRow(data, currentStageIndex + 1);
+        appendTableRow(data);
 
         currentStageIndex++;
     }
 
-    function appendTableRow(d, stageNum) {
+    function appendTableRow(d) {
         const tbody = document.getElementById('data-table-body');
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>Stage ${stageNum}</td>
+            <td>Stage ${d.stage}</td>
+            <td>${d.timeMin} min</td>
             <td>${d.intensityPct}%</td>
             <td>${d.vo2.toFixed(2)}</td>
             <td>${d.vco2.toFixed(2)}</td>
@@ -520,14 +529,14 @@
         document.getElementById('btn-run').innerText = 'Pause GXT';
         document.getElementById('btn-run').style.background = '#C62828';
         
-        // Lock controls during test
         document.getElementById('athlete-profile').disabled = true;
         document.getElementById('param-bm').disabled = true;
         document.getElementById('param-vo2max').disabled = true;
+        document.getElementById('param-stage-dur').disabled = true;
 
-        const stageDurationSec = parseInt(document.getElementById('param-stage-dur').value);
-        stepSimulation(); // initial instant step
-        simInterval = setInterval(stepSimulation, stageDurationSec * 1000);
+        const intervalSec = parseInt(document.getElementById('param-speed').value);
+        stepSimulation();
+        simInterval = setInterval(stepSimulation, intervalSec * 1000);
     }
 
     function stopSimulation() {
@@ -547,6 +556,7 @@
         crossoverIntensity = null;
 
         // Reset HUD
+        document.getElementById('live-time').innerText = '0';
         document.getElementById('live-intensity').innerText = '0';
         document.getElementById('live-vo2').innerText = '0.00';
         document.getElementById('live-vco2').innerText = '0.00';
@@ -564,6 +574,7 @@
         document.getElementById('athlete-profile').disabled = false;
         document.getElementById('param-bm').disabled = false;
         document.getElementById('param-vo2max').disabled = false;
+        document.getElementById('param-stage-dur').disabled = false;
 
         // Reset Charts
         crossoverChart.data.labels = [];
@@ -585,17 +596,17 @@
             return;
         }
 
-        let csv = 'Stage,%VO2max,VO2 (L/min),VCO2 (L/min),RER,Fat Oxidation (g/min),CHO Oxidation (g/min),Fat Energy (kcal/min),CHO Energy (kcal/min),Total Energy (kcal/min),% Fat Energy,% CHO Energy\n';
+        let csv = 'Stage,Time (min),%VO2max,VO2 (L/min),VCO2 (L/min),RER,Fat Oxidation (g/min),CHO Oxidation (g/min),Fat Energy (kcal/min),CHO Energy (kcal/min),Total Energy (kcal/min),% Fat Energy,% CHO Energy\n';
         
-        recordedData.forEach((d, i) => {
-            csv += `${i+1},${d.intensityPct},${d.vo2.toFixed(3)},${d.vco2.toFixed(3)},${d.rer.toFixed(3)},${d.fatGrams.toFixed(3)},${d.choGrams.toFixed(3)},${d.fatKcal.toFixed(2)},${d.choKcal.toFixed(2)},${d.totalKcal.toFixed(2)},${d.pctFat.toFixed(1)},${d.pctCarb.toFixed(1)}\n`;
+        recordedData.forEach((d) => {
+            csv += `${d.stage},${d.timeMin},${d.intensityPct},${d.vo2.toFixed(3)},${d.vco2.toFixed(3)},${d.rer.toFixed(3)},${d.fatGrams.toFixed(3)},${d.choGrams.toFixed(3)},${d.fatKcal.toFixed(2)},${d.choKcal.toFixed(2)},${d.totalKcal.toFixed(2)},${d.pctFat.toFixed(1)},${d.pctCarb.toFixed(1)}\n`;
         });
 
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.setAttribute('href', url);
-        link.setAttribute('download', `Montevallo_Simulations_Crossover_Data_${document.getElementById('athlete-profile').value}.csv`);
+        link.setAttribute('download', `Montevallo_Crossover_Lab_Data_${document.getElementById('athlete-profile').value}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -604,10 +615,3 @@
 
 </body>
 </html>
-```
-
-***
-
-### Summary of Updates
-1. **Title & Branding:** The HTML `<title>` tag and the main header text now explicitly feature **Montevallo-Simulations**.
-2. **Export Naming:** The exported CSV file generated by the **Export CSV for Lab Report** button is now named `Montevallo_Simulations_Crossover_Data_[profile].csv`.
