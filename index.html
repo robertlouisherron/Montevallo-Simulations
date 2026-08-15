@@ -291,8 +291,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Playback Speed <span class="val" id="speed-disp">2.5s / stage</span></label>
-                    <input type="range" id="param-speed" min="1" max="6" value="2.5" step="0.5" oninput="updateParamDisp()">
+                    <label>Playback Speed <span class="val" id="speed-disp">5s / stage</span></label>
+                    <input type="range" id="param-speed" min="2" max="60" value="5" step="1" oninput="updateParamDisp()">
                 </div>
             </div>
 
@@ -392,12 +392,18 @@
         <!-- Panel 3: Graphical Visualizations (Stacked Vertically) -->
         <section class="card">
             <div class="card-header">
-                <h2>Metabolic & Ventilatory Plots</h2>
+                <h2>Physiological Plots (Warmup Through Max Exertion)</h2>
             </div>
             <div class="charts-container">
+                <!-- Plot 1: Substrates & Lactate -->
                 <div class="chart-box">
                     <canvas id="crossoverChart"></canvas>
                 </div>
+                <!-- Plot 2: HR, Rf, and RPE -->
+                <div class="chart-box" style="margin-top: 15px;">
+                    <canvas id="strainChart"></canvas>
+                </div>
+                <!-- Plot 3: VE, VE/VO2, VE/VCO2 -->
                 <div class="chart-box" style="margin-top: 15px;">
                     <canvas id="ventilatoryKineticsChart"></canvas>
                 </div>
@@ -539,6 +545,83 @@
         }
     });
 
+    // --- PLOT 2: HR, Rf, and RPE ONLY ---
+    const ctxStrain = document.getElementById('strainChart').getContext('2d');
+    const strainChart = new Chart(ctxStrain, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: 'Heart Rate (bpm)',
+                    borderColor: HR_PINK,
+                    backgroundColor: 'transparent',
+                    borderWidth: 2.5,
+                    data: [],
+                    fill: false,
+                    tension: 0.3,
+                    yAxisID: 'yHR'
+                },
+                {
+                    label: 'Resp Frequency - Rf (br/min)',
+                    borderColor: VE_TEAL,
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    borderDash: [4, 4],
+                    data: [],
+                    fill: false,
+                    tension: 0.3,
+                    yAxisID: 'yRf'
+                },
+                {
+                    label: 'Borg RPE (6-20)',
+                    borderColor: UM_PURPLE,
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    data: [],
+                    fill: false,
+                    tension: 0.3,
+                    yAxisID: 'yRPE'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: { display: true, text: 'Cardiorespiratory Strain & Perceived Effort (HR, Rf, RPE)', font: { size: 12, weight: 'bold' } },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Stage & Intensity (% VO₂max)', font: { size: 11 } } },
+                yHR: {
+                    type: 'linear',
+                    position: 'left',
+                    min: 40,
+                    max: 210,
+                    title: { display: true, text: 'HR (bpm)', color: HR_PINK, font: { size: 11 } }
+                },
+                yRf: {
+                    type: 'linear',
+                    position: 'right',
+                    min: 10,
+                    max: 65,
+                    title: { display: true, text: 'Rf (breaths/min)', color: VE_TEAL, font: { size: 11 } },
+                    grid: { drawOnChartArea: false }
+                },
+                yRPE: {
+                    type: 'linear',
+                    position: 'right',
+                    min: 6,
+                    max: 20,
+                    title: { display: true, text: 'RPE (6-20)', color: UM_PURPLE, font: { size: 11 } },
+                    grid: { drawOnChartArea: false }
+                }
+            }
+        }
+    });
+
+    // --- PLOT 3: VENTILATORY MEASURES ONLY (VE, VE/VO2, VE/VCO2) ---
     const ctxVent = document.getElementById('ventilatoryKineticsChart').getContext('2d');
     const ventilatoryChart = new Chart(ctxVent, {
         type: 'line',
@@ -548,17 +631,17 @@
                 {
                     label: 'VE (L/min)',
                     borderColor: VE_TEAL,
-                    backgroundColor: 'rgba(0, 121, 107, 0.1)',
+                    backgroundColor: 'rgba(0, 121, 107, 0.08)',
                     borderWidth: 2.5,
                     data: [],
-                    fill: false,
+                    fill: true,
                     tension: 0.3,
                     yAxisID: 'yVE'
                 },
                 {
                     label: 'VE / VO₂',
                     borderColor: UM_PURPLE,
-                    borderWidth: 2,
+                    borderWidth: 2.2,
                     borderDash: [4, 4],
                     data: [],
                     fill: false,
@@ -568,21 +651,12 @@
                 {
                     label: 'VE / VCO₂',
                     borderColor: UM_GOLD,
-                    borderWidth: 2,
+                    borderWidth: 2.2,
                     borderDash: [2, 2],
                     data: [],
                     fill: false,
                     tension: 0.3,
                     yAxisID: 'yEquiv'
-                },
-                {
-                    label: 'Heart Rate (bpm)',
-                    borderColor: HR_PINK,
-                    borderWidth: 1.5,
-                    data: [],
-                    fill: false,
-                    tension: 0.3,
-                    yAxisID: 'yHR'
                 }
             ]
         },
@@ -590,11 +664,11 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                title: { display: true, text: 'Ventilatory Thresholds (VT1 / VT2) & Heart Rate', font: { size: 12, weight: 'bold' } },
+                title: { display: true, text: 'Ventilatory Dynamics & Thresholds (VE, VE/VO₂, VE/VCO₂)', font: { size: 12, weight: 'bold' } },
                 tooltip: { mode: 'index', intersect: false }
             },
             scales: {
-                x: { title: { display: true, text: 'Intensity (% VO₂max)', font: { size: 11 } } },
+                x: { title: { display: true, text: 'Stage & Intensity (% VO₂max)', font: { size: 11 } } },
                 yVE: {
                     type: 'linear',
                     position: 'left',
@@ -607,15 +681,7 @@
                     position: 'right',
                     min: 15,
                     max: 55,
-                    title: { display: true, text: 'Ventilatory Equivalents', color: UM_PURPLE, font: { size: 11 } },
-                    grid: { drawOnChartArea: false }
-                },
-                yHR: {
-                    type: 'linear',
-                    position: 'right',
-                    min: 50,
-                    max: 210,
-                    display: false,
+                    title: { display: true, text: 'Ventilatory Equivalents (VE/VO₂, VE/VCO₂)', color: UM_PURPLE, font: { size: 11 } },
                     grid: { drawOnChartArea: false }
                 }
             }
@@ -817,18 +883,27 @@
             document.getElementById('vt2-summary').innerText = `~76% VO₂max (Stage 3-4)`;
         }
 
-        // Update Charts
-        crossoverChart.data.labels.push(`S${data.stageNum} (${data.intensityPct}%)`);
+        const stageLabel = `${data.stageName} (${data.intensityPct}%)`;
+
+        // Update Plot 1 (Crossover & Lactate)
+        crossoverChart.data.labels.push(stageLabel);
         crossoverChart.data.datasets[0].data.push(data.pctFat.toFixed(1));
         crossoverChart.data.datasets[1].data.push(data.pctCarb.toFixed(1));
         crossoverChart.data.datasets[2].data.push(data.lactate.toFixed(2));
         crossoverChart.update();
 
-        ventilatoryChart.data.labels.push(`S${data.stageNum} (${data.intensityPct}%)`);
+        // Update Plot 2: Strain Chart (HR, Rf, RPE)
+        strainChart.data.labels.push(stageLabel);
+        strainChart.data.datasets[0].data.push(data.hr);
+        strainChart.data.datasets[1].data.push(data.rf);
+        strainChart.data.datasets[2].data.push(data.rpe);
+        strainChart.update();
+
+        // Update Plot 3: Ventilatory Chart (VE, VE/VO2, VE/VCO2)
+        ventilatoryChart.data.labels.push(stageLabel);
         ventilatoryChart.data.datasets[0].data.push(data.ve.toFixed(1));
         ventilatoryChart.data.datasets[1].data.push(data.ve_vo2.toFixed(1));
         ventilatoryChart.data.datasets[2].data.push(data.ve_vco2.toFixed(1));
-        ventilatoryChart.data.datasets[3].data.push(data.hr);
         ventilatoryChart.update();
 
         // Add to Table
@@ -938,6 +1013,10 @@
         crossoverChart.data.labels = [];
         crossoverChart.data.datasets.forEach(ds => ds.data = []);
         crossoverChart.update();
+
+        strainChart.data.labels = [];
+        strainChart.data.datasets.forEach(ds => ds.data = []);
+        strainChart.update();
 
         ventilatoryChart.data.labels = [];
         ventilatoryChart.data.datasets.forEach(ds => ds.data = []);
