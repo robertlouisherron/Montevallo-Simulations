@@ -468,7 +468,6 @@
 
 <script>
     // --- PROTOCOL SCHEDULES ---
-    // 1. Minute-by-Minute Interval Schedule (16 points: 0:00 to 15:00)
     const minuteSchedule = [
         { timeMin: 0, phase: "Rest / Base", targetPct: 15, isRest: true },
         { timeMin: 1, phase: "Warmup (1m)", targetPct: 35, isRest: false },
@@ -488,7 +487,6 @@
         { timeMin: 15, phase: "Stage 4 (3m)", targetPct: 100, isRest: false }
     ];
 
-    // 2. Stage-by-Stage Interval Schedule (6 points: 0:00 Rest, 3:00 Warmup, 6:00 Stg 1, 9:00 Stg 2, 12:00 Stg 3, 15:00 Stg 4)
     const stageSchedule = [
         { timeMin: 0, phase: "Rest / Base", targetPct: 15, isRest: true },
         { timeMin: 3, phase: "Warmup", targetPct: 35, isRest: false },
@@ -1195,7 +1193,7 @@
         document.getElementById('data-table-body').innerHTML = '';
     }
 
-    // --- CSV EXPORT UTILITY ---
+    // --- CSV / EXCEL EXPORT UTILITY ---
     function exportDataCSV() {
         if (recordedData.length === 0) {
             alert('Please run the simulation protocol first before exporting data.');
@@ -1203,17 +1201,76 @@
         }
 
         const mode = document.getElementById('sampling-mode').value;
-        let csv = 'Phase,Time,Speed (mph),Grade (%),%VO2max,VO2 (mL/kg/min),VO2 (L/min),VCO2 (L/min),RER,HR (bpm),Blood Lactate (mmol/L),VE (L/min),Vt (L),Rf (breaths/min),VE/VO2,VE/VCO2,Borg RPE (6-20),Fat Oxidation (g/min),CHO Oxidation (g/min),Total Energy (kcal/min),% Fat Energy,% CHO Energy\\n';
-        
+        const profile = document.getElementById('athlete-profile').value;
+
+        // Column Headers
+        const headers = [
+            'Phase / Stage',
+            'Time (min:sec)',
+            'Treadmill Speed (mph)',
+            'Treadmill Grade (%)',
+            'Exercise Intensity (% VO2max)',
+            'Relative VO2 (mL/kg/min)',
+            'Absolute VO2 (L/min)',
+            'Absolute VCO2 (L/min)',
+            'RER (VCO2/VO2)',
+            'Heart Rate (bpm)',
+            'Blood Lactate (mmol/L)',
+            'Minute Ventilation VE (L/min)',
+            'Tidal Volume Vt (L)',
+            'Respiratory Frequency Rf (br/min)',
+            'Ventilatory Equivalent VE/VO2',
+            'Ventilatory Equivalent VE/VCO2',
+            'Borg RPE (6-20)',
+            'Fat Oxidation (g/min)',
+            'Carbohydrate Oxidation (g/min)',
+            'Fat Energy (kcal/min)',
+            'Carbohydrate Energy (kcal/min)',
+            'Total Caloric Expenditure (kcal/min)',
+            'Percent Energy Fat (%)',
+            'Percent Energy Carbohydrate (%)'
+        ];
+
+        // Format into rows array
+        const rows = [headers.join(',')];
+
         recordedData.forEach((d) => {
-            csv += `${d.phase},${d.timeMinStr},${d.speedMph},${d.gradePct},${d.intensityPct},${d.vo2Rel.toFixed(2)},${d.vo2Abs.toFixed(3)},${d.vco2Abs.toFixed(3)},${d.rer.toFixed(3)},${d.hr},${d.lactate.toFixed(2)},${d.ve.toFixed(2)},${d.vt.toFixed(2)},${d.rf.toFixed(0)},${d.ve_vo2.toFixed(2)},${d.ve_vco2.toFixed(2)},${d.rpe},${d.fatGrams.toFixed(3)},${d.choGrams.toFixed(3)},${d.totalKcal.toFixed(2)},${d.pctFat.toFixed(1)},${d.pctCarb.toFixed(1)}\\n`;
+            const rowData = [
+                `"${d.phase}"`,
+                `"${d.timeMinStr}"`,
+                d.speedMph,
+                d.gradePct,
+                d.intensityPct,
+                d.vo2Rel.toFixed(2),
+                d.vo2Abs.toFixed(3),
+                d.vco2Abs.toFixed(3),
+                d.rer.toFixed(3),
+                d.hr,
+                d.lactate.toFixed(2),
+                d.ve.toFixed(2),
+                d.vt.toFixed(2),
+                d.rf.toFixed(0),
+                d.ve_vo2.toFixed(2),
+                d.ve_vco2.toFixed(2),
+                d.rpe,
+                d.fatGrams.toFixed(3),
+                d.choGrams.toFixed(3),
+                d.fatKcal.toFixed(2),
+                d.choKcal.toFixed(2),
+                d.totalKcal.toFixed(2),
+                d.pctFat.toFixed(1),
+                d.pctCarb.toFixed(1)
+            ];
+            rows.push(rowData.join(','));
         });
 
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        // Add UTF-8 Byte Order Mark (\uFEFF) and \r\n so Excel automatically recognizes columns and rows
+        const csvContent = '\uFEFF' + rows.join('\r\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.setAttribute('href', url);
-        link.setAttribute('download', `Montevallo_${mode}_GXT_Lab_Data_${document.getElementById('athlete-profile').value}.csv`);
+        link.setAttribute('download', `Montevallo_${mode}_GXT_Lab_Report_${profile}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
