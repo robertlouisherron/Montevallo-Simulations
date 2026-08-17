@@ -18,6 +18,8 @@
             --lactate-red: #D32F2F;
             --hr-pink: #C2185B;
             --ve-teal: #00796B;
+            --vo2-green: #2E7D32;
+            --vco2-amber: #E65100;
             --bg-canvas: #F4F5F8;
             --card-bg: #FFFFFF;
             --text-main: #212529;
@@ -387,25 +389,29 @@
         <section class="card" style="font-size: 0.8rem; color: #555;">
             <h3 style="color: var(--um-purple); font-size: 0.9rem; margin-bottom: 6px;">Integrated Thresholds & Calorimetry</h3>
             <p style="margin-bottom: 3px;">• <strong>ACSM Running:</strong> VO₂ = (0.2 × S) + (0.9 × S × G) + 3.5</p>
-            <p style="margin-bottom: 3px;">• <strong>Lactate Threshold (LT₁):</strong> The first point where [La⁻] begins to rise above resting levels (~2.0 mmol/L, V̇E/VO₂ inflection, RER ≈ 0.85).</p>
-            <p>• <strong>Onset of Blood Lactate Accumulation (OBLA / LT₂):</strong> The intensity at which blood lactate reaches 4.0 mmol/L, marking severe metabolic acidosis and hyperventilation (V̇E/VCO₂ surge, RER > 1.00).</p>
+            <p style="margin-bottom: 3px;">• <strong>Lactate Threshold (LT₁):</strong> Initial rise in blood lactate above resting levels (~2.0 mmol/L, V̇E/VO₂ inflection, RER ≈ 0.85).</p>
+            <p>• <strong>Onset of Blood Lactate Accumulation (OBLA / LT₂):</strong> Blood lactate reaches 4.0 mmol/L (V̇E/VCO₂ surge, RER > 1.00).</p>
         </section>
 
-        <!-- Panel 3: Graphical Visualizations (Stacked Vertically) -->
+        <!-- Panel 3: Graphical Visualizations (Stacked Vertically, Start to Finish) -->
         <section class="card">
             <div class="card-header">
-                <h2>Physiological Plots (Minute-by-Minute Averages)</h2>
+                <h2>Physiological Plots (Recorded Continuously: Warmup through Max Exertion)</h2>
             </div>
             <div class="charts-container">
                 <!-- Plot 1: Substrates & Lactate -->
                 <div class="chart-box">
                     <canvas id="crossoverChart"></canvas>
                 </div>
-                <!-- Plot 2: HR, Rf, and RPE -->
+                <!-- Plot 2: VO2, VCO2, and RER -->
+                <div class="chart-box" style="margin-top: 15px;">
+                    <canvas id="gasExchangeChart"></canvas>
+                </div>
+                <!-- Plot 3: HR, Rf, and RPE -->
                 <div class="chart-box" style="margin-top: 15px;">
                     <canvas id="strainChart"></canvas>
                 </div>
-                <!-- Plot 3: VE, VE/VO2, VE/VCO2 -->
+                <!-- Plot 4: VE, VE/VO2, VE/VCO2 -->
                 <div class="chart-box" style="margin-top: 15px;">
                     <canvas id="ventilatoryKineticsChart"></canvas>
                 </div>
@@ -454,7 +460,6 @@
 
 <script>
     // --- PROTOCOL: 1-Minute Averages from 0:00 (Baseline) to 15:00 (Max Exertion) ---
-    // Total 16 time points: Min 0 (Rest), Min 1-3 (Warmup 35%), Min 4-6 (55%), Min 7-9 (72%), Min 10-12 (88%), Min 13-15 (100%)
     const protocolMinutes = [
         { minute: 0, phase: "Rest / Base", targetPct: 15, isRest: true },
         { minute: 1, phase: "Warmup (1m)", targetPct: 35, isRest: false },
@@ -501,8 +506,14 @@
     const LACTATE_RED = '#D32F2F';
     const VE_TEAL = '#00796B';
     const HR_PINK = '#C2185B';
+    const VO2_GREEN = '#2E7D32';
+    const VCO2_AMBER = '#E65100';
 
-    // --- INITIALIZE CHARTS ---
+    // ==========================================
+    // INITIALIZE 4 DISTINCT PLOTS (ALL FROM 0:00)
+    // ==========================================
+
+    // PLOT 1: SUBSTRATES & LACTATE
     const ctxCrossover = document.getElementById('crossoverChart').getContext('2d');
     const crossoverChart = new Chart(ctxCrossover, {
         type: 'line',
@@ -561,7 +572,75 @@
         }
     });
 
-    // --- PLOT 2: HR, Rf, and RPE ONLY ---
+    // PLOT 2: VO2, VCO2, and RER (START TO FINISH)
+    const ctxGas = document.getElementById('gasExchangeChart').getContext('2d');
+    const gasExchangeChart = new Chart(ctxGas, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: 'VO₂ (L/min)',
+                    borderColor: VO2_GREEN,
+                    backgroundColor: 'transparent',
+                    borderWidth: 2.5,
+                    data: [],
+                    fill: false,
+                    tension: 0.3,
+                    yAxisID: 'yGas'
+                },
+                {
+                    label: 'VCO₂ (L/min)',
+                    borderColor: VCO2_AMBER,
+                    backgroundColor: 'transparent',
+                    borderWidth: 2.5,
+                    borderDash: [4, 4],
+                    data: [],
+                    fill: false,
+                    tension: 0.3,
+                    yAxisID: 'yGas'
+                },
+                {
+                    label: 'RER',
+                    borderColor: UM_PURPLE,
+                    backgroundColor: 'transparent',
+                    borderWidth: 2.2,
+                    data: [],
+                    fill: false,
+                    tension: 0.3,
+                    yAxisID: 'yRER'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: { display: true, text: 'Gas Exchange Kinetics (VO₂, VCO₂, and RER)', font: { size: 12, weight: 'bold' } },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Test Time & Intensity (% VO₂max)', font: { size: 11 } } },
+                yGas: {
+                    type: 'linear',
+                    position: 'left',
+                    min: 0,
+                    max: 6.0,
+                    title: { display: true, text: 'VO₂ & VCO₂ (L/min)', color: VO2_GREEN, font: { size: 11 } }
+                },
+                yRER: {
+                    type: 'linear',
+                    position: 'right',
+                    min: 0.65,
+                    max: 1.25,
+                    title: { display: true, text: 'RER (VCO₂ / VO₂)', color: UM_PURPLE, font: { size: 11 } },
+                    grid: { drawOnChartArea: false }
+                }
+            }
+        }
+    });
+
+    // PLOT 3: HR, Rf, and RPE ONLY
     const ctxStrain = document.getElementById('strainChart').getContext('2d');
     const strainChart = new Chart(ctxStrain, {
         type: 'line',
@@ -637,7 +716,7 @@
         }
     });
 
-    // --- PLOT 3: VENTILATORY MEASURES ONLY (VE, VE/VO2, VE/VCO2) ---
+    // PLOT 4: VENTILATORY MEASURES ONLY (VE, VE/VO2, VE/VCO2)
     const ctxVent = document.getElementById('ventilatoryKineticsChart').getContext('2d');
     const ventilatoryChart = new Chart(ctxVent, {
         type: 'line',
@@ -680,7 +759,7 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                title: { display: true, text: 'Ventilatory Dynamics & Thresholds (VE, VE/VO₂, VE/VCO₂)', font: { size: 12, weight: 'bold' } },
+                title: { display: true, text: 'Ventilatory Dynamics & Equivalents (VE, VE/VO₂, VE/VCO₂)', font: { size: 12, weight: 'bold' } },
                 tooltip: { mode: 'index', intersect: false }
             },
             scales: {
@@ -696,7 +775,7 @@
                     type: 'linear',
                     position: 'right',
                     min: 15,
-                    max: 55,
+                    max: 60,
                     title: { display: true, text: 'Ventilatory Equivalents (VE/VO₂, VE/VCO₂)', color: UM_PURPLE, font: { size: 11 } },
                     grid: { drawOnChartArea: false }
                 }
@@ -816,7 +895,7 @@
             hr = hr - ((normalizedInt - oblaThreshold) * 12);
         }
 
-        // 4. Ventilatory Measures (VE, Vt, Rf, VE/VO2, VE/VCO2)
+        // 4. Ventilatory Measures (VE, Vt, Rf, VE/VO2, VE/VCO2) - Robust from 0:00 through Max
         let vt = minObj.isRest ? 0.55 : (0.55 + (1.95 / (1 + Math.exp(-6 * (normalizedInt - 0.45)))));
         let rf = minObj.isRest ? 12 : (12 + (18 * normalizedInt) + Math.max(0, Math.pow((normalizedInt - oblaThreshold) * 35, 1.8)));
         let ve = vt * rf;
@@ -921,14 +1000,21 @@
         crossoverChart.data.datasets[2].data.push(data.lactate.toFixed(2));
         crossoverChart.update();
 
-        // Update Plot 2: Strain Chart (HR, Rf, RPE)
+        // Update Plot 2: VO2, VCO2, and RER (Start to Finish)
+        gasExchangeChart.data.labels.push(labelStr);
+        gasExchangeChart.data.datasets[0].data.push(data.vo2Abs.toFixed(2));
+        gasExchangeChart.data.datasets[1].data.push(data.vco2Abs.toFixed(2));
+        gasExchangeChart.data.datasets[2].data.push(data.rer.toFixed(2));
+        gasExchangeChart.update();
+
+        // Update Plot 3: Strain Chart (HR, Rf, RPE)
         strainChart.data.labels.push(labelStr);
         strainChart.data.datasets[0].data.push(data.hr);
         strainChart.data.datasets[1].data.push(data.rf);
         strainChart.data.datasets[2].data.push(data.rpe);
         strainChart.update();
 
-        // Update Plot 3: Ventilatory Chart (VE, VE/VO2, VE/VCO2)
+        // Update Plot 4: Ventilatory Chart (VE, VE/VO2, VE/VCO2)
         ventilatoryChart.data.labels.push(labelStr);
         ventilatoryChart.data.datasets[0].data.push(data.ve.toFixed(1));
         ventilatoryChart.data.datasets[1].data.push(data.ve_vo2.toFixed(1));
@@ -1042,10 +1128,14 @@
         document.getElementById('param-age').disabled = false;
         document.getElementById('param-rhr').disabled = false;
 
-        // Reset Charts
+        // Reset All 4 Charts
         crossoverChart.data.labels = [];
         crossoverChart.data.datasets.forEach(ds => ds.data = []);
         crossoverChart.update();
+
+        gasExchangeChart.data.labels = [];
+        gasExchangeChart.data.datasets.forEach(ds => ds.data = []);
+        gasExchangeChart.update();
 
         strainChart.data.labels = [];
         strainChart.data.datasets.forEach(ds => ds.data = []);
