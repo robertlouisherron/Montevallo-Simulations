@@ -525,6 +525,7 @@
                     borderColor: FAT_BLUE,
                     backgroundColor: 'rgba(2, 136, 209, 0.1)',
                     borderWidth: 2.5,
+                    pointRadius: 3,
                     data: [],
                     fill: false,
                     tension: 0.3
@@ -534,6 +535,7 @@
                     borderColor: CARB_ORANGE,
                     backgroundColor: 'rgba(230, 74, 25, 0.1)',
                     borderWidth: 2.5,
+                    pointRadius: 3,
                     data: [],
                     fill: false,
                     tension: 0.3
@@ -542,6 +544,7 @@
                     label: 'Blood [La⁻] (mM)',
                     borderColor: LACTATE_RED,
                     borderWidth: 2.5,
+                    pointRadius: 3,
                     borderDash: [3, 3],
                     data: [],
                     fill: false,
@@ -584,6 +587,7 @@
                     borderColor: VO2_GREEN,
                     backgroundColor: 'transparent',
                     borderWidth: 2.5,
+                    pointRadius: 3,
                     data: [],
                     fill: false,
                     tension: 0.3,
@@ -594,6 +598,7 @@
                     borderColor: VCO2_AMBER,
                     backgroundColor: 'transparent',
                     borderWidth: 2.5,
+                    pointRadius: 3,
                     borderDash: [4, 4],
                     data: [],
                     fill: false,
@@ -605,6 +610,7 @@
                     borderColor: UM_PURPLE,
                     backgroundColor: 'transparent',
                     borderWidth: 2.2,
+                    pointRadius: 3,
                     data: [],
                     fill: false,
                     tension: 0.3,
@@ -652,6 +658,7 @@
                     borderColor: HR_PINK,
                     backgroundColor: 'transparent',
                     borderWidth: 2.5,
+                    pointRadius: 3,
                     data: [],
                     fill: false,
                     tension: 0.3,
@@ -662,6 +669,7 @@
                     borderColor: VE_TEAL,
                     backgroundColor: 'transparent',
                     borderWidth: 2,
+                    pointRadius: 3,
                     borderDash: [4, 4],
                     data: [],
                     fill: false,
@@ -673,6 +681,7 @@
                     borderColor: UM_PURPLE,
                     backgroundColor: 'transparent',
                     borderWidth: 2,
+                    pointRadius: 3,
                     data: [],
                     fill: false,
                     tension: 0.3,
@@ -728,6 +737,7 @@
                     borderColor: VE_TEAL,
                     backgroundColor: 'rgba(0, 121, 107, 0.08)',
                     borderWidth: 2.5,
+                    pointRadius: 3,
                     data: [],
                     fill: true,
                     tension: 0.3,
@@ -737,6 +747,7 @@
                     label: 'VE / VO₂',
                     borderColor: UM_PURPLE,
                     borderWidth: 2.2,
+                    pointRadius: 3,
                     borderDash: [4, 4],
                     data: [],
                     fill: false,
@@ -747,6 +758,7 @@
                     label: 'VE / VCO₂',
                     borderColor: UM_GOLD,
                     borderWidth: 2.2,
+                    pointRadius: 3,
                     borderDash: [2, 2],
                     data: [],
                     fill: false,
@@ -832,9 +844,6 @@
         const erg = minObj.isRest ? { speedMph: "0.0", gradePct: "0.0" } : calculateTreadmillWorkload(currentVO2Rel);
 
         // Threshold parameters based on athlete classification:
-        // Trained: LT1 ~68% VO2max, OBLA ~86% VO2max
-        // Rec: LT1 ~58% VO2max, OBLA ~76% VO2max
-        // Sedentary: LT1 ~48% VO2max, OBLA ~66% VO2max
         let lt1Threshold = 0.58;
         let oblaThreshold = 0.76;
         let shiftFactor = 0;
@@ -882,7 +891,6 @@
         }
 
         // 2. Blood Lactate Kinetics [La-]
-        // Baseline ~1.1 mM; inflection at LT1 (~2.0 mM); crosses 4.0 mM at OBLA (LT2)
         let ltExponent = Math.max(0, (normalizedInt - lt1Threshold) * 8.5);
         let bloodLactate = minObj.isRest ? 1.1 : (1.1 + Math.pow(normalizedInt, 2) * 0.6 + Math.exp(ltExponent) * 0.22);
         if (normalizedInt >= 1.0) bloodLactate = Math.min(14.0, bloodLactate);
@@ -895,9 +903,18 @@
             hr = hr - ((normalizedInt - oblaThreshold) * 12);
         }
 
-        // 4. Ventilatory Measures (VE, Vt, Rf, VE/VO2, VE/VCO2) - Robust from 0:00 through Max
-        let vt = minObj.isRest ? 0.55 : (0.55 + (1.95 / (1 + Math.exp(-6 * (normalizedInt - 0.45)))));
-        let rf = minObj.isRest ? 12 : (12 + (18 * normalizedInt) + Math.max(0, Math.pow((normalizedInt - oblaThreshold) * 35, 1.8)));
+        // 4. Calibrated Ventilatory Measures (Active & Visible across Warmup, Stage 1, Stage 2, Stage 3, Stage 4)
+        let vt = 0.55;
+        let rf = 13.0;
+        if (!minObj.isRest) {
+            vt = 0.55 + (1.90 / (1 + Math.exp(-5.5 * (normalizedInt - 0.40))));
+            let baseRf = 13.0 + (24.0 * normalizedInt);
+            let surge = 0;
+            if (normalizedInt > oblaThreshold) {
+                surge = Math.pow((normalizedInt - oblaThreshold) / (1.0 - oblaThreshold), 1.6) * 18.0;
+            }
+            rf = baseRf + surge;
+        }
         let ve = vt * rf;
 
         let ve_vo2 = ve / currentVO2Abs;
