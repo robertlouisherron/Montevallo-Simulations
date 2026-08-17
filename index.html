@@ -39,7 +39,7 @@
         
         .container { 
             width: 100%; 
-            max-width: 960px; 
+            max-width: 980px; 
             margin: 0 auto; 
             overflow-x: hidden;
         }
@@ -185,25 +185,27 @@
         }
         .chart-box { position: relative; height: 260px; width: 100%; }
 
-        /* LAB HIGHLIGHT BANNER */
+        /* THRESHOLD REPORT & SUMMARY BANNER */
         .threshold-banner { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); 
             gap: 8px; 
             background: var(--um-gold-pale); 
-            border: 1px solid var(--um-gold); 
+            border: 1.5px solid var(--um-gold); 
             border-radius: 6px; 
             padding: 10px 12px; 
             margin-bottom: 10px; 
         }
         .threshold-item { display: flex; flex-direction: column; }
-        .threshold-title { font-size: 0.7rem; font-weight: 800; color: var(--um-purple); text-transform: uppercase; }
+        .threshold-title { font-size: 0.72rem; font-weight: 800; color: var(--um-purple); text-transform: uppercase; }
         .threshold-val { font-size: 0.95rem; font-weight: 800; color: var(--um-purple-dark); margin-top: 1px; }
-        .threshold-sub { font-size: 0.68rem; color: #665200; }
+        .threshold-sub { font-size: 0.68rem; color: #665200; line-height: 1.2; margin-top: 1px; }
 
-        /* SUMMARY TABLE (COMPACT & CLEANLY STYLED) */
+        /* SUMMARY TABLE */
         .table-responsive { 
             width: 100%; 
+            max-height: 290px;
+            overflow-y: auto;
             overflow-x: auto; 
             border: 1px solid var(--border); 
             border-radius: 6px; 
@@ -240,10 +242,9 @@
     <header>
         <div>
             <h1>Exercise & Nutrition Science Program</h1>
-            <p>15-Minute Cardiorespiratory & Substrate Kinetics GXT Simulation</p>
+            <p>15-Minute Cardiorespiratory & Blood Lactate GXT (1-Minute Averages)</p>
         </div>
         <div class="logo-wrapper">
-            <!-- Directly loads CHP.png from the GitHub repository root on a crisp white container -->
             <div class="logo-container">
                 <img src="CHP.png" alt="College of Health Professions Logo" class="logo-img" onerror="this.style.display='none'; document.getElementById('logo-fallback-box').style.display='block';">
                 <div id="logo-fallback-box" class="logo-fallback" style="display:none; color:var(--um-purple); font-weight:800; font-size:0.85rem;">
@@ -264,9 +265,9 @@
                 <div class="form-group">
                     <label>Fitness Classification</label>
                     <select id="athlete-profile" onchange="resetSimulation()">
-                        <option value="trained">Endurance Trained (High VT1/VT2 & FatOx)</option>
-                        <option value="recreational" selected>Recreationally Active (Normal)</option>
-                        <option value="sedentary">Sedentary / Untrained (Low VT1/VT2)</option>
+                        <option value="trained">Endurance Trained (Elevated LT & OBLA, High FatOx)</option>
+                        <option value="recreational" selected>Recreationally Active (Normal LT & OBLA)</option>
+                        <option value="sedentary">Sedentary / Untrained (Early LT & OBLA)</option>
                     </select>
                 </div>
 
@@ -291,8 +292,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Playback Speed <span class="val" id="speed-disp">5s / stage</span></label>
-                    <input type="range" id="param-speed" min="2" max="60" value="5" step="1" oninput="updateParamDisp()">
+                    <label>Playback Speed <span class="val" id="speed-disp">2s / min</span></label>
+                    <input type="range" id="param-speed" min="2" max="60" value="2" step="1" oninput="updateParamDisp()">
+                    <small style="color:var(--text-muted); font-size:0.7rem;">Animation time per 1-min data average</small>
                 </div>
             </div>
 
@@ -306,7 +308,7 @@
         <!-- Panel 2: Live Ergometer & Telemetry Readings -->
         <section class="card">
             <div class="card-header">
-                <h2>Live Telemetry Readings</h2>
+                <h2>Live Telemetry Readings (1-Minute Averages)</h2>
             </div>
             
             <div class="telemetry-grid">
@@ -333,11 +335,11 @@
                 </div>
                 <div class="metric-tile gold">
                     <div class="metric-label">RER</div>
-                    <div class="metric-value" id="live-rer">0.72</div>
+                    <div class="metric-value" id="live-rer">0.74</div>
                 </div>
                 <div class="metric-tile lac">
                     <div class="metric-label">Blood [La⁻]</div>
-                    <div class="metric-value"><span id="live-lactate">1.2</span><span class="metric-unit">mM</span></div>
+                    <div class="metric-value"><span id="live-lactate">1.1</span><span class="metric-unit">mM</span></div>
                 </div>
                 <div class="metric-tile ve">
                     <div class="metric-label">VE</div>
@@ -361,38 +363,38 @@
                 </div>
             </div>
 
-            <!-- Threshold Analysis Banner -->
+            <!-- Threshold Report & Evaluation Banner -->
             <div class="threshold-banner">
                 <div class="threshold-item">
-                    <span class="threshold-title">FATmax Zone</span>
+                    <span class="threshold-title">FATmax Point</span>
                     <span class="threshold-val" id="fatmax-summary">-- % VO₂max</span>
                     <span class="threshold-sub" id="fatmax-rate-sub">Rate: -- g/min</span>
                 </div>
                 <div class="threshold-item">
-                    <span class="threshold-title">VT1 / LT1 (Aerobic Threshold)</span>
-                    <span class="threshold-val" id="vt1-summary">-- % VO₂max</span>
-                    <span class="threshold-sub" id="vt1-sub">RER ≈ 0.85 | V̇E/VO₂ inflection | [La⁻] ≈ 2.0 mM</span>
+                    <span class="threshold-title">Lactate Threshold (LT₁ / Aerobic)</span>
+                    <span class="threshold-val" id="lt1-summary">-- % VO₂max</span>
+                    <span class="threshold-sub" id="lt1-sub">Initial elevation above baseline (~2.0 mM, VT₁)</span>
                 </div>
                 <div class="threshold-item">
-                    <span class="threshold-title">VT2 / RCP / LT2 (Anaerobic)</span>
-                    <span class="threshold-val" id="vt2-summary">-- % VO₂max</span>
-                    <span class="threshold-sub" id="vt2-sub">RER > 1.00 | V̇E/VCO₂ surge | [La⁻] > 4.0 mM</span>
+                    <span class="threshold-title">Onset of Blood Lactate (OBLA / LT₂)</span>
+                    <span class="threshold-val" id="obla-summary">-- % VO₂max</span>
+                    <span class="threshold-sub" id="obla-sub">Fixed 4.0 mM Threshold (VT₂ / RCP)</span>
                 </div>
             </div>
         </section>
 
         <!-- Physiological Reference Box (Clean UTF-8 Characters) -->
         <section class="card" style="font-size: 0.8rem; color: #555;">
-            <h3 style="color: var(--um-purple); font-size: 0.9rem; margin-bottom: 6px;">Integrated Thresholds</h3>
-            <p style="margin-bottom: 4px;">• <strong>ACSM Running:</strong> VO₂ = (0.2 × S) + (0.9 × S × G) + 3.5</p>
-            <p style="margin-bottom: 4px;">• <strong>VT1 / LT1:</strong> Aerobic inflection; V̇E/VO₂ rises while V̇E/VCO₂ stays flat (~RER 0.85, [La⁻] ≈ 2.0 mM).</p>
-            <p>• <strong>VT2 / RCP / LT2:</strong> Hyperventilation threshold; V̇E/VCO₂ surges, [La⁻] > 4.0 mM, RER > 1.00.</p>
+            <h3 style="color: var(--um-purple); font-size: 0.9rem; margin-bottom: 6px;">Integrated Thresholds & Calorimetry</h3>
+            <p style="margin-bottom: 3px;">• <strong>ACSM Running:</strong> VO₂ = (0.2 × S) + (0.9 × S × G) + 3.5</p>
+            <p style="margin-bottom: 3px;">• <strong>Lactate Threshold (LT₁):</strong> The first point where [La⁻] begins to rise above resting levels (~2.0 mmol/L, V̇E/VO₂ inflection, RER ≈ 0.85).</p>
+            <p>• <strong>Onset of Blood Lactate Accumulation (OBLA / LT₂):</strong> The intensity at which blood lactate reaches 4.0 mmol/L, marking severe metabolic acidosis and hyperventilation (V̇E/VCO₂ surge, RER > 1.00).</p>
         </section>
 
         <!-- Panel 3: Graphical Visualizations (Stacked Vertically) -->
         <section class="card">
             <div class="card-header">
-                <h2>Physiological Plots (Warmup Through Max Exertion)</h2>
+                <h2>Physiological Plots (Minute-by-Minute Averages)</h2>
             </div>
             <div class="charts-container">
                 <!-- Plot 1: Substrates & Lactate -->
@@ -413,31 +415,31 @@
         <!-- Panel 4: Complete Protocol Log Table -->
         <section class="card">
             <div class="card-header">
-                <h2>15-Minute Graded Exercise Protocol Log (5 Stages × 3 Minutes)</h2>
+                <h2>15-Minute Protocol Log: 1-Minute Averages (Baseline to 15:00)</h2>
             </div>
             <div class="table-responsive">
                 <table id="data-table">
                     <thead>
                         <tr>
-                            <th>Stage</th>
+                            <th>Phase</th>
                             <th>Time</th>
-                            <th>Speed</th>
-                            <th>Grade</th>
-                            <th>% VO₂</th>
+                            <th>Speed (mph)</th>
+                            <th>Grade (%)</th>
+                            <th>% VO₂max</th>
                             <th>VO₂ (mL/kg/m)</th>
                             <th>VO₂ (L/m)</th>
                             <th>VCO₂ (L/m)</th>
                             <th>RER</th>
-                            <th>HR</th>
-                            <th>[La⁻]</th>
-                            <th>VE</th>
-                            <th>Vt</th>
-                            <th>Rf</th>
+                            <th>HR (bpm)</th>
+                            <th>[La⁻] (mM)</th>
+                            <th>VE (L/m)</th>
+                            <th>Vt (L)</th>
+                            <th>Rf (br/m)</th>
                             <th>VE/VO₂</th>
                             <th>VE/VCO₂</th>
                             <th>RPE</th>
-                            <th>Fat(g)</th>
-                            <th>CHO(g)</th>
+                            <th>Fat (g/m)</th>
+                            <th>CHO (g/m)</th>
                             <th>Total (kcal)</th>
                         </tr>
                     </thead>
@@ -451,22 +453,36 @@
 </div>
 
 <script>
-    // --- PROTOCOL: Exactly 15 Minutes (5 stages x 3 minutes) ---
-    const protocolStages = [
-        { stage: 1, name: "Warmup", min: 3, targetPct: 35 },
-        { stage: 2, name: "Stage 1", min: 6, targetPct: 55 },
-        { stage: 3, name: "Stage 2", min: 9, targetPct: 72 },
-        { stage: 4, name: "Stage 3", min: 12, targetPct: 88 },
-        { stage: 5, name: "Stage 4", min: 15, targetPct: 100 }
+    // --- PROTOCOL: 1-Minute Averages from 0:00 (Baseline) to 15:00 (Max Exertion) ---
+    // Total 16 time points: Min 0 (Rest), Min 1-3 (Warmup 35%), Min 4-6 (55%), Min 7-9 (72%), Min 10-12 (88%), Min 13-15 (100%)
+    const protocolMinutes = [
+        { minute: 0, phase: "Rest / Base", targetPct: 15, isRest: true },
+        { minute: 1, phase: "Warmup (1m)", targetPct: 35, isRest: false },
+        { minute: 2, phase: "Warmup (2m)", targetPct: 35, isRest: false },
+        { minute: 3, phase: "Warmup (3m)", targetPct: 35, isRest: false },
+        { minute: 4, phase: "Stage 1 (1m)", targetPct: 55, isRest: false },
+        { minute: 5, phase: "Stage 1 (2m)", targetPct: 55, isRest: false },
+        { minute: 6, phase: "Stage 1 (3m)", targetPct: 55, isRest: false },
+        { minute: 7, phase: "Stage 2 (1m)", targetPct: 72, isRest: false },
+        { minute: 8, phase: "Stage 2 (2m)", targetPct: 72, isRest: false },
+        { minute: 9, phase: "Stage 2 (3m)", targetPct: 72, isRest: false },
+        { minute: 10, phase: "Stage 3 (1m)", targetPct: 88, isRest: false },
+        { minute: 11, phase: "Stage 3 (2m)", targetPct: 88, isRest: false },
+        { minute: 12, phase: "Stage 3 (3m)", targetPct: 88, isRest: false },
+        { minute: 13, phase: "Stage 4 (1m)", targetPct: 100, isRest: false },
+        { minute: 14, phase: "Stage 4 (2m)", targetPct: 100, isRest: false },
+        { minute: 15, phase: "Stage 4 (3m)", targetPct: 100, isRest: false }
     ];
 
     let isRunning = false;
     let simInterval = null;
-    let currentStageIndex = 0;
+    let currentMinuteIndex = 0;
     let recordedData = [];
     
     let maxFatRate = -1;
     let fatMaxIntensity = null;
+    let identifiedLT1 = null;
+    let identifiedOBLA = null;
 
     // --- UI DISPLAY HELPER ---
     function updateParamDisp() {
@@ -474,7 +490,7 @@
         document.getElementById('bm-disp').innerText = document.getElementById('param-bm').value;
         document.getElementById('vo2max-disp').innerText = document.getElementById('param-vo2max').value;
         document.getElementById('rhr-disp').innerText = document.getElementById('param-rhr').value;
-        document.getElementById('speed-disp').innerText = document.getElementById('param-speed').value + 's / stage';
+        document.getElementById('speed-disp').innerText = document.getElementById('param-speed').value + 's / min';
     }
 
     // --- COLOR CONSTANTS ---
@@ -514,7 +530,7 @@
                 {
                     label: 'Blood [La⁻] (mM)',
                     borderColor: LACTATE_RED,
-                    borderWidth: 2,
+                    borderWidth: 2.5,
                     borderDash: [3, 3],
                     data: [],
                     fill: false,
@@ -527,18 +543,18 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                title: { display: true, text: 'Substrate Crossover & Blood Lactate Kinetics', font: { size: 12, weight: 'bold' } },
+                title: { display: true, text: 'Substrate Oxidation & Blood Lactate Kinetics', font: { size: 12, weight: 'bold' } },
                 tooltip: { mode: 'index', intersect: false }
             },
             scales: {
-                x: { title: { display: true, text: 'Intensity (% VO₂max)', font: { size: 11 } } },
-                y: { min: 0, max: 100, title: { display: true, text: '% Energy', font: { size: 11 } } },
+                x: { title: { display: true, text: 'Test Time & Intensity (% VO₂max)', font: { size: 11 } } },
+                y: { min: 0, max: 100, title: { display: true, text: '% Energy Contribution', font: { size: 11 } } },
                 yLactate: {
                     type: 'linear',
                     position: 'right',
                     min: 0,
                     max: 14,
-                    title: { display: true, text: '[La⁻] (mM)', color: LACTATE_RED, font: { size: 11 } },
+                    title: { display: true, text: '[La⁻] (mmol/L)', color: LACTATE_RED, font: { size: 11 } },
                     grid: { drawOnChartArea: false }
                 }
             }
@@ -593,7 +609,7 @@
                 tooltip: { mode: 'index', intersect: false }
             },
             scales: {
-                x: { title: { display: true, text: 'Stage & Intensity (% VO₂max)', font: { size: 11 } } },
+                x: { title: { display: true, text: 'Test Time & Intensity (% VO₂max)', font: { size: 11 } } },
                 yHR: {
                     type: 'linear',
                     position: 'left',
@@ -668,7 +684,7 @@
                 tooltip: { mode: 'index', intersect: false }
             },
             scales: {
-                x: { title: { display: true, text: 'Stage & Intensity (% VO₂max)', font: { size: 11 } } },
+                x: { title: { display: true, text: 'Test Time & Intensity (% VO₂max)', font: { size: 11 } } },
                 yVE: {
                     type: 'linear',
                     position: 'left',
@@ -724,32 +740,41 @@
         };
     }
 
-    // --- INTEGRATED METABOLIC, VENTILATORY & LACTATE MODEL ---
-    function calculateStagePhysiology(stageObj, bodyMass, vo2maxRel, age, rhr, profile) {
-        const intensityPct = stageObj.targetPct;
-        const currentVO2Rel = (intensityPct / 100) * vo2maxRel;
-        const currentVO2Abs = (currentVO2Rel * bodyMass) / 1000;
+    // --- INTEGRATED 1-MINUTE AVERAGE METABOLIC, VENTILATORY & LACTATE MODEL ---
+    function calculateMinutePhysiology(minObj, bodyMass, vo2maxRel, age, rhr, profile) {
+        let intensityPct = minObj.targetPct;
+        let currentVO2Rel = (intensityPct / 100) * vo2maxRel;
+        if (minObj.isRest) {
+            currentVO2Rel = 3.5; // Standard 1 MET baseline
+            intensityPct = Math.round((currentVO2Rel / vo2maxRel) * 100);
+        }
+        const currentVO2Abs = Math.max(0.20, (currentVO2Rel * bodyMass) / 1000);
 
-        const erg = calculateTreadmillWorkload(currentVO2Rel);
+        const erg = minObj.isRest ? { speedMph: "0.0", gradePct: "0.0" } : calculateTreadmillWorkload(currentVO2Rel);
 
-        let vt1Threshold = 0.58;
-        let vt2Threshold = 0.76;
+        // Threshold parameters based on athlete classification:
+        // Trained: LT1 ~68% VO2max, OBLA ~86% VO2max
+        // Rec: LT1 ~58% VO2max, OBLA ~76% VO2max
+        // Sedentary: LT1 ~48% VO2max, OBLA ~66% VO2max
+        let lt1Threshold = 0.58;
+        let oblaThreshold = 0.76;
         let shiftFactor = 0;
 
         if (profile === 'trained') {
-            vt1Threshold = 0.68;
-            vt2Threshold = 0.86;
+            lt1Threshold = 0.68;
+            oblaThreshold = 0.86;
             shiftFactor = -0.06;
         } else if (profile === 'sedentary') {
-            vt1Threshold = 0.48;
-            vt2Threshold = 0.66;
+            lt1Threshold = 0.48;
+            oblaThreshold = 0.66;
             shiftFactor = 0.05;
         }
 
-        let normalizedInt = intensityPct / 100;
+        let normalizedInt = Math.max(0.10, intensityPct / 100);
 
-        // 1. RER Modeling
-        let baseRER = 0.72 + (0.42 / (1 + Math.exp(-7.5 * (normalizedInt - vt1Threshold))));
+        // 1. RER Modeling (1-min averaged: 0.74 baseline -> ~0.85 at LT1 -> >1.00 at OBLA)
+        let baseRER = 0.72 + (0.44 / (1 + Math.exp(-7.5 * (normalizedInt - lt1Threshold))));
+        if (minObj.isRest) baseRER = 0.74;
         let currentRER = Math.min(1.18, Math.max(0.70, baseRER + shiftFactor));
 
         let cappedRER = Math.min(1.00, Math.max(0.707, currentRER));
@@ -759,7 +784,7 @@
 
         const currentVCO2 = currentVO2Abs * currentRER;
 
-        // Frayn substrate oxidation rates
+        // Frayn substrate oxidation rates (g/min)
         let fatGramsMin = Math.max(0, (1.67 * currentVO2Abs) - (1.67 * currentVCO2));
         let choGramsMin = Math.max(0, (4.55 * currentVCO2) - (3.21 * currentVO2Abs));
 
@@ -777,35 +802,36 @@
             fatKcalMin = 0;
         }
 
-        // 2. Blood Lactate Kinetics
-        let ltExponent = Math.max(0, (normalizedInt - vt1Threshold) * 8.5);
-        let bloodLactate = 1.1 + Math.pow(normalizedInt, 2) * 0.6 + Math.exp(ltExponent) * 0.22;
+        // 2. Blood Lactate Kinetics [La-]
+        // Baseline ~1.1 mM; inflection at LT1 (~2.0 mM); crosses 4.0 mM at OBLA (LT2)
+        let ltExponent = Math.max(0, (normalizedInt - lt1Threshold) * 8.5);
+        let bloodLactate = minObj.isRest ? 1.1 : (1.1 + Math.pow(normalizedInt, 2) * 0.6 + Math.exp(ltExponent) * 0.22);
         if (normalizedInt >= 1.0) bloodLactate = Math.min(14.0, bloodLactate);
 
-        // 3. Heart Rate Kinetics
+        // 3. Heart Rate Kinetics (Tanaka equation)
         const hrMax = 208 - (0.7 * age);
         let hrReserve = hrMax - rhr;
-        let hr = rhr + (hrReserve * normalizedInt);
-        if (normalizedInt > vt2Threshold) {
-            hr = hr - ((normalizedInt - vt2Threshold) * 12);
+        let hr = minObj.isRest ? rhr : (rhr + (hrReserve * normalizedInt));
+        if (normalizedInt > oblaThreshold && !minObj.isRest) {
+            hr = hr - ((normalizedInt - oblaThreshold) * 12);
         }
 
-        // 4. Ventilatory Measures
-        let vt = 0.6 + (1.9 / (1 + Math.exp(-6 * (normalizedInt - 0.45))));
-        let rf = 12 + (16 * normalizedInt) + Math.max(0, Math.pow((normalizedInt - vt2Threshold) * 35, 1.8));
+        // 4. Ventilatory Measures (VE, Vt, Rf, VE/VO2, VE/VCO2)
+        let vt = minObj.isRest ? 0.55 : (0.55 + (1.95 / (1 + Math.exp(-6 * (normalizedInt - 0.45)))));
+        let rf = minObj.isRest ? 12 : (12 + (18 * normalizedInt) + Math.max(0, Math.pow((normalizedInt - oblaThreshold) * 35, 1.8)));
         let ve = vt * rf;
 
         let ve_vo2 = ve / currentVO2Abs;
         let ve_vco2 = ve / currentVCO2;
 
-        // 5. Borg RPE
-        let rpe = Math.round(6 + (normalizedInt * 14));
+        // 5. Borg RPE (6-20)
+        let rpe = minObj.isRest ? 6 : Math.round(6 + (normalizedInt * 14));
         rpe = Math.min(20, Math.max(6, rpe));
 
         return {
-            stageNum: stageObj.stage,
-            stageName: stageObj.name,
-            timeMinStr: `${stageObj.min}:00`,
+            minute: minObj.minute,
+            phase: minObj.phase,
+            timeMinStr: `${minObj.minute}:00`,
             speedMph: erg.speedMph,
             gradePct: erg.gradePct,
             intensityPct: intensityPct,
@@ -831,21 +857,21 @@
         };
     }
 
-    // --- STEP-BY-STEP SIMULATION ENGINE ---
+    // --- STEP-BY-STEP SIMULATION ENGINE (1-MINUTE DATA INCREMENTS) ---
     function stepSimulation() {
-        if (currentStageIndex >= protocolStages.length) {
+        if (currentMinuteIndex >= protocolMinutes.length) {
             stopSimulation();
             return;
         }
 
-        const stageObj = protocolStages[currentStageIndex];
+        const minObj = protocolMinutes[currentMinuteIndex];
         const bodyMass = parseFloat(document.getElementById('param-bm').value);
         const vo2max = parseFloat(document.getElementById('param-vo2max').value);
         const age = parseFloat(document.getElementById('param-age').value);
         const rhr = parseFloat(document.getElementById('param-rhr').value);
         const profile = document.getElementById('athlete-profile').value;
 
-        const data = calculateStagePhysiology(stageObj, bodyMass, vo2max, age, rhr, profile);
+        const data = calculateMinutePhysiology(minObj, bodyMass, vo2max, age, rhr, profile);
         recordedData.push(data);
 
         // Update live telemetry HUD
@@ -864,43 +890,46 @@
         document.getElementById('live-fat-pct').innerText = data.pctFat.toFixed(0);
         document.getElementById('live-carb-pct').innerText = data.pctCarb.toFixed(0);
 
-        // Track Thresholds
-        if (data.fatGrams > maxFatRate) {
+        // 1. Track FATmax
+        if (data.fatGrams > maxFatRate && !minObj.isRest) {
             maxFatRate = data.fatGrams;
             fatMaxIntensity = data.intensityPct;
             document.getElementById('fatmax-summary').innerText = `${fatMaxIntensity}% VO₂max`;
-            document.getElementById('fatmax-rate-sub').innerText = `Rate: ${maxFatRate.toFixed(2)} g/min (${data.speedMph} mph, ${data.gradePct}%)`;
+            document.getElementById('fatmax-rate-sub').innerText = `Peak Rate: ${maxFatRate.toFixed(2)} g/min (${data.speedMph} mph, ${data.gradePct}%)`;
         }
 
-        if (profile === 'trained') {
-            document.getElementById('vt1-summary').innerText = `~68% VO₂max (Stage 3)`;
-            document.getElementById('vt2-summary').innerText = `~86% VO₂max (Stage 4)`;
-        } else if (profile === 'sedentary') {
-            document.getElementById('vt1-summary').innerText = `~48% VO₂max (Stage 2)`;
-            document.getElementById('vt2-summary').innerText = `~66% VO₂max (Stage 3)`;
-        } else {
-            document.getElementById('vt1-summary').innerText = `~58% VO₂max (Stage 2-3)`;
-            document.getElementById('vt2-summary').innerText = `~76% VO₂max (Stage 3-4)`;
+        // 2. Track Lactate Threshold (LT1: first point >= 2.0 mM)
+        if (identifiedLT1 === null && data.lactate >= 2.0 && !minObj.isRest) {
+            identifiedLT1 = data;
+            document.getElementById('lt1-summary').innerText = `${data.intensityPct}% VO₂max (Min ${data.minute}:00)`;
+            document.getElementById('lt1-sub').innerText = `[La⁻] = ${data.lactate.toFixed(2)} mM | VO₂ = ${data.vo2Rel.toFixed(1)} mL/kg/min`;
         }
 
-        const stageLabel = `${data.stageName} (${data.intensityPct}%)`;
+        // 3. Track Onset of Blood Lactate Accumulation (OBLA: first point >= 4.0 mM)
+        if (identifiedOBLA === null && data.lactate >= 4.0 && !minObj.isRest) {
+            identifiedOBLA = data;
+            document.getElementById('obla-summary').innerText = `${data.intensityPct}% VO₂max (Min ${data.minute}:00)`;
+            document.getElementById('obla-sub').innerText = `[La⁻] = ${data.lactate.toFixed(2)} mM | VO₂ = ${data.vo2Rel.toFixed(1)} mL/kg/min (VT₂)`;
+        }
 
-        // Update Plot 1 (Crossover & Lactate)
-        crossoverChart.data.labels.push(stageLabel);
+        const labelStr = `${data.minute}m (${data.intensityPct}%)`;
+
+        // Update Plot 1: Substrates & Lactate
+        crossoverChart.data.labels.push(labelStr);
         crossoverChart.data.datasets[0].data.push(data.pctFat.toFixed(1));
         crossoverChart.data.datasets[1].data.push(data.pctCarb.toFixed(1));
         crossoverChart.data.datasets[2].data.push(data.lactate.toFixed(2));
         crossoverChart.update();
 
         // Update Plot 2: Strain Chart (HR, Rf, RPE)
-        strainChart.data.labels.push(stageLabel);
+        strainChart.data.labels.push(labelStr);
         strainChart.data.datasets[0].data.push(data.hr);
         strainChart.data.datasets[1].data.push(data.rf);
         strainChart.data.datasets[2].data.push(data.rpe);
         strainChart.update();
 
         // Update Plot 3: Ventilatory Chart (VE, VE/VO2, VE/VCO2)
-        ventilatoryChart.data.labels.push(stageLabel);
+        ventilatoryChart.data.labels.push(labelStr);
         ventilatoryChart.data.datasets[0].data.push(data.ve.toFixed(1));
         ventilatoryChart.data.datasets[1].data.push(data.ve_vo2.toFixed(1));
         ventilatoryChart.data.datasets[2].data.push(data.ve_vco2.toFixed(1));
@@ -909,14 +938,14 @@
         // Add to Table
         appendTableRow(data);
 
-        currentStageIndex++;
+        currentMinuteIndex++;
     }
 
     function appendTableRow(d) {
         const tbody = document.getElementById('data-table-body');
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td><strong>${d.stageName}</strong></td>
+            <td><strong>${d.phase}</strong></td>
             <td>${d.timeMinStr}</td>
             <td style="font-weight:700;">${d.speedMph}</td>
             <td>${d.gradePct}%</td>
@@ -949,7 +978,7 @@
     }
 
     function startSimulation() {
-        if (currentStageIndex >= protocolStages.length) {
+        if (currentMinuteIndex >= protocolMinutes.length) {
             resetSimulation();
         }
         isRunning = true;
@@ -976,10 +1005,12 @@
 
     function resetSimulation() {
         stopSimulation();
-        currentStageIndex = 0;
+        currentMinuteIndex = 0;
         recordedData = [];
         maxFatRate = -1;
         fatMaxIntensity = null;
+        identifiedLT1 = null;
+        identifiedOBLA = null;
 
         // Reset HUD
         document.getElementById('live-time').innerText = '0:00';
@@ -988,8 +1019,8 @@
         document.getElementById('live-hr').innerText = '--';
         document.getElementById('live-vo2-rel').innerText = '0.0';
         document.getElementById('live-vo2-abs').innerText = '0.00';
-        document.getElementById('live-rer').innerText = '0.72';
-        document.getElementById('live-lactate').innerText = '1.2';
+        document.getElementById('live-rer').innerText = '0.74';
+        document.getElementById('live-lactate').innerText = '1.1';
         document.getElementById('live-ve').innerText = '0.0';
         document.getElementById('live-vt').innerText = '0.0';
         document.getElementById('live-rf').innerText = '0';
@@ -998,8 +1029,10 @@
         document.getElementById('live-carb-pct').innerText = '0';
         document.getElementById('fatmax-summary').innerText = '-- % VO₂max';
         document.getElementById('fatmax-rate-sub').innerText = 'Rate: -- g/min';
-        document.getElementById('vt1-summary').innerText = '-- % VO₂max';
-        document.getElementById('vt2-summary').innerText = '-- % VO₂max';
+        document.getElementById('lt1-summary').innerText = '-- % VO₂max';
+        document.getElementById('lt1-sub').innerText = 'Initial elevation above baseline (~2.0 mM, VT₁)';
+        document.getElementById('obla-summary').innerText = '-- % VO₂max';
+        document.getElementById('obla-sub').innerText = 'Fixed 4.0 mM Threshold (VT₂ / RCP)';
         document.getElementById('btn-run').innerText = 'Start 15-min GXT';
 
         // Unlock controls
@@ -1033,17 +1066,17 @@
             return;
         }
 
-        let csv = 'Stage,Time,Speed (mph),Grade (%),%VO2max,VO2 (mL/kg/min),VO2 (L/min),VCO2 (L/min),RER,HR (bpm),Blood Lactate (mmol/L),VE (L/min),Vt (L),Rf (breaths/min),VE/VO2,VE/VCO2,Borg RPE (6-20),Fat Oxidation (g/min),CHO Oxidation (g/min),Total Energy (kcal/min),% Fat Energy,% CHO Energy\n';
+        let csv = 'Phase,Time,Speed (mph),Grade (%),%VO2max,VO2 (mL/kg/min),VO2 (L/min),VCO2 (L/min),RER,HR (bpm),Blood Lactate (mmol/L),VE (L/min),Vt (L),Rf (breaths/min),VE/VO2,VE/VCO2,Borg RPE (6-20),Fat Oxidation (g/min),CHO Oxidation (g/min),Total Energy (kcal/min),% Fat Energy,% CHO Energy\n';
         
         recordedData.forEach((d) => {
-            csv += `${d.stageName},${d.timeMinStr},${d.speedMph},${d.gradePct},${d.intensityPct},${d.vo2Rel.toFixed(2)},${d.vo2Abs.toFixed(3)},${d.vco2Abs.toFixed(3)},${d.rer.toFixed(3)},${d.hr},${d.lactate.toFixed(2)},${d.ve.toFixed(2)},${d.vt.toFixed(2)},${d.rf},${d.ve_vo2.toFixed(2)},${d.ve_vco2.toFixed(2)},${d.rpe},${d.fatGrams.toFixed(3)},${d.choGrams.toFixed(3)},${d.totalKcal.toFixed(2)},${d.pctFat.toFixed(1)},${d.pctCarb.toFixed(1)}\n`;
+            csv += `${d.phase},${d.timeMinStr},${d.speedMph},${d.gradePct},${d.intensityPct},${d.vo2Rel.toFixed(2)},${d.vo2Abs.toFixed(3)},${d.vco2Abs.toFixed(3)},${d.rer.toFixed(3)},${d.hr},${d.lactate.toFixed(2)},${d.ve.toFixed(2)},${d.vt.toFixed(2)},${d.rf},${d.ve_vo2.toFixed(2)},${d.ve_vco2.toFixed(2)},${d.rpe},${d.fatGrams.toFixed(3)},${d.choGrams.toFixed(3)},${d.totalKcal.toFixed(2)},${d.pctFat.toFixed(1)},${d.pctCarb.toFixed(1)}\n`;
         });
 
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.setAttribute('href', url);
-        link.setAttribute('download', `Montevallo_15min_GXT_Comprehensive_Lab_${document.getElementById('athlete-profile').value}.csv`);
+        link.setAttribute('download', `Montevallo_1min_GXT_Comprehensive_Lab_${document.getElementById('athlete-profile').value}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
